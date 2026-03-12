@@ -3,1268 +3,1206 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Agendio — Seus clientes agendam sozinhos. Você só atende.</title>
-<meta name="description" content="Pare de perder tempo marcando horários no WhatsApp. O Agendio cria sua agenda online automática em minutos.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<title id="page-title">Agendio — Sistema de Agendamento</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-/* ══════════════════════════════════════
-   AGENDIO — Página de Vendas Kiwify
-   Sem nav · Focada em conversão
-   ══════════════════════════════════════ */
-:root {
-  --bg:    #070707;
-  --bg2:   #0b0b0b;
-  --white: #f5f0e8;
-  --gold:  #d4a843;
-  --rust:  #c8440a;
-  --rust2: #df5512;
-  --green: #1a9a56;
-  --mid:   #555;
-  --smoke: #101010;
-  --border:rgba(255,255,255,.07);
+:root{
+  --ink:#0d0d0d;--cream:#f5f0e8;--rust:#c8440a;--gold:#d4a843;
+  --smoke:#2a2a2a;--mid:#555;--green:#2d7a4f;--red:#b03030;--orange:#c87010;--wa:#25d366;
+  --accent:#c8440a;
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
-body{
-  font-family:'DM Sans',sans-serif;
-  background:var(--bg);
-  color:var(--white);
-  overflow-x:hidden;
-  line-height:1.65;
-}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--cream);min-height:100vh;}
 
-/* ── NOISE TEXTURE ── */
-body::after{
-  content:'';position:fixed;inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
-  pointer-events:none;z-index:999;
-}
+/* HEADER */
+header{background:var(--smoke);border-bottom:3px solid var(--accent);padding:14px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--gold);}
+.logo span{color:var(--cream);}
+.logo small{font-size:10px;letter-spacing:1px;display:block;color:var(--mid);font-family:'DM Sans',sans-serif;margin-top:-3px;}
+.admin-link{font-size:12px;color:var(--mid);text-decoration:none;border:1px solid var(--mid);padding:5px 10px;border-radius:4px;transition:all .2s;}
+.admin-link:hover{color:var(--gold);border-color:var(--gold);}
+.lock-banner{background:var(--red);color:#fff;text-align:center;padding:10px 16px;font-size:13px;font-weight:600;display:none;}
+.lock-banner.visible{display:block;}
 
-/* ── SCROLL REVEAL ── */
-.sr{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease;}
-.sr.on{opacity:1;transform:none;}
-.sr-d1{transition-delay:.1s;}
-.sr-d2{transition-delay:.2s;}
-.sr-d3{transition-delay:.3s;}
+/* SCREENS */
+.screen{display:none;padding:20px 18px;max-width:480px;margin:0 auto;}
+.screen.active{display:block;}
+h2{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:2px;margin-bottom:6px;}
+h3{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:1px;margin-bottom:12px;}
+.subtitle{color:var(--mid);font-size:13px;margin-bottom:20px;}
 
-/* ── HELPERS ── */
-.c{max-width:1040px;margin:0 auto;padding:0 22px;}
-.c-sm{max-width:680px;margin:0 auto;padding:0 22px;}
-.divider{height:1px;background:var(--border);margin:0 22px;}
-section{padding:88px 0;}
-.tag{
-  display:inline-block;
-  font-family:'Syne',sans-serif;font-size:10px;font-weight:700;
-  letter-spacing:2.5px;text-transform:uppercase;
-  color:var(--gold);background:rgba(212,168,67,.09);
-  border:1px solid rgba(212,168,67,.22);
-  padding:5px 14px;border-radius:20px;margin-bottom:16px;
-}
-.tag.green{color:var(--green);background:rgba(26,154,86,.09);border-color:rgba(26,154,86,.22);}
-h2.display{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(38px,6.5vw,66px);
-  letter-spacing:2px;line-height:.95;
-  margin-bottom:14px;
-}
-h2.display em{color:var(--gold);font-style:normal;}
-.sec-sub{
-  font-size:16px;color:rgba(245,240,232,.52);
-  line-height:1.75;max-width:540px;
-}
+/* SETUP WIZARD */
+.wizard-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 18px;}
+.wizard-box{background:var(--smoke);border-radius:16px;padding:32px 24px;width:100%;max-width:420px;border:1px solid #3a3a3a;text-align:center;}
+.wizard-icon{font-size:56px;margin-bottom:16px;}
+.wizard-box h2{font-size:26px;margin-bottom:6px;}
+.wizard-box .subtitle{margin-bottom:22px;}
+.business-types{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;text-align:left;}
+.btype{padding:12px 10px;background:var(--ink);border:2px solid #3a3a3a;border-radius:8px;cursor:pointer;font-size:13px;transition:all .2s;display:flex;align-items:center;gap:8px;}
+.btype:hover{border-color:var(--gold);}
+.btype.selected{border-color:var(--gold);background:#2a2500;}
+.btype .btype-icon{font-size:18px;}
+.wizard-steps{display:flex;justify-content:center;gap:6px;margin-bottom:20px;}
+.wstep{width:8px;height:8px;border-radius:50%;background:#3a3a3a;transition:all .3s;}
+.wstep.active{background:var(--gold);width:20px;border-radius:4px;}
+.wstep.done{background:var(--green);}
 
-/* ════════════════ HERO ════════════════ */
-.hero{
-  min-height:100vh;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  text-align:center;padding:72px 22px 60px;
-  position:relative;overflow:hidden;
-}
-.hero-aura{
-  position:absolute;inset:0;pointer-events:none;
-  background:
-    radial-gradient(ellipse 75% 55% at 50% 25%,rgba(200,68,10,.18) 0%,transparent 65%),
-    radial-gradient(ellipse 45% 35% at 15% 75%,rgba(212,168,67,.09) 0%,transparent 55%),
-    radial-gradient(ellipse 40% 35% at 85% 70%,rgba(26,154,86,.07) 0%,transparent 55%);
-}
-.hero-eyebrow{
-  display:inline-flex;align-items:center;gap:7px;
-  font-family:'Syne',sans-serif;font-size:11px;font-weight:700;
-  letter-spacing:2px;text-transform:uppercase;color:var(--gold);
-  background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.24);
-  padding:7px 18px;border-radius:30px;margin-bottom:28px;
-  animation:fu .5s ease both;
-}
-.pulse-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pd 1.6s ease-in-out infinite;}
-@keyframes pd{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.3;transform:scale(1.4);}}
+/* LANDING */
+.landing-hero{background:linear-gradient(135deg,#1a0804 0%,var(--smoke) 100%);border-radius:14px;padding:28px 22px;margin-bottom:14px;border:1px solid #3a2010;text-align:center;position:relative;overflow:hidden;}
+.landing-hero::before{content:'';position:absolute;right:-15px;top:-15px;font-size:110px;opacity:.05;transform:rotate(20deg);}
+.landing-hero h1{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:3px;color:var(--gold);margin-bottom:3px;}
+.landing-hero .biz-type-label{font-size:11px;color:var(--mid);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;}
+.landing-hero .barber-name{color:var(--cream);font-size:16px;font-weight:600;margin-bottom:4px;}
+.landing-hero .shop-address{font-size:12px;color:var(--mid);margin-bottom:16px;}
+.open-badge{display:inline-flex;align-items:center;gap:6px;background:#0d2a1a;border:1px solid var(--green);color:var(--green);padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:16px;}
+.open-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.3);}}
+.closed-badge{display:inline-flex;align-items:center;gap:6px;background:#2a0a0a;border:1px solid var(--red);color:var(--red);padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:16px;}
+.hours-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:18px;}
+.hour-block{background:#1a1a1a;border-radius:8px;padding:9px;text-align:center;font-size:11px;color:var(--mid);}
+.hour-block .hday{font-weight:600;color:var(--cream);margin-bottom:1px;font-size:11px;}
+.hot-slots{background:linear-gradient(135deg,#1a2a10,#0d1a08);border:2px solid var(--green);border-radius:12px;padding:13px 15px;margin-bottom:13px;}
+.hot-slots-title{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;color:var(--green);margin-bottom:9px;}
+.hot-slot-item{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #1a3a1a;}
+.hot-slot-item:last-child{border:none;}
+.hot-slot-time{font-weight:700;font-size:14px;}
+.hot-slot-label{font-size:10px;color:var(--green);font-weight:600;}
+.book-now-btn{background:var(--green);color:#fff;border:none;border-radius:6px;padding:5px 11px;font-size:11px;font-weight:600;cursor:pointer;}
 
-.hero h1{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(52px,11vw,112px);
-  letter-spacing:2px;line-height:.9;
-  margin-bottom:10px;
-  animation:fu .5s .1s ease both;
-}
-.hero h1 .gold{color:var(--gold);}
-.hero h1 .rust{color:var(--rust);}
+/* DAYS */
+.days-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+.day-card{background:var(--smoke);border:2px solid transparent;border-radius:10px;padding:15px 13px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.day-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--accent);}
+.day-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+.day-card .day-name{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:var(--gold);}
+.day-card .day-date{font-size:11px;color:var(--mid);margin-top:2px;}
+.day-card .slot-count{font-size:12px;margin-top:6px;color:var(--cream);}
+.day-card .slot-count span{color:var(--green);font-weight:600;}
+.day-card.no-slots{opacity:.5;cursor:not-allowed;}
+.day-card.no-slots:hover{transform:none;border-color:transparent;}
+.day-card.day-off{opacity:.4;cursor:not-allowed;}
+.day-card.day-off::before{background:var(--mid);}
+.day-card.day-off:hover{transform:none;border-color:transparent;}
+.day-card.locked-day{opacity:.45;cursor:not-allowed;}
+.day-card.locked-day::before{background:var(--red);}
+.day-card.locked-day:hover{transform:none;border-color:transparent;}
+.day-card.has-available::after{content:'⚡ Agora!';position:absolute;top:7px;right:7px;font-size:9px;background:var(--green);color:#fff;padding:2px 6px;border-radius:10px;font-weight:600;}
 
-.hero-sub{
-  font-family:'Syne',sans-serif;
-  font-size:clamp(15px,2.6vw,20px);
-  color:rgba(245,240,232,.55);
-  max-width:580px;margin:16px auto 36px;
-  line-height:1.6;
-  animation:fu .5s .2s ease both;
-}
+/* SLOTS */
+.back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--mid);font-size:13px;cursor:pointer;margin-bottom:16px;border:none;background:none;font-family:'DM Sans',sans-serif;padding:0;}
+.back-btn:hover{color:var(--cream);}
+.slots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.slot-btn{background:var(--smoke);border:2px solid transparent;color:var(--cream);border-radius:8px;padding:12px 6px;text-align:center;cursor:pointer;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;transition:all .2s;position:relative;}
+.slot-btn:hover{border-color:var(--accent);background:#3a2020;}
+.slot-btn.selected{border-color:var(--gold);background:#3a3010;color:var(--gold);}
+.slot-btn.just-freed{border-color:var(--green);animation:freed-pulse 1.5s ease-in-out 3;}
+.slot-btn.just-freed::after{content:'🔥';position:absolute;top:-8px;right:-4px;font-size:11px;}
+@keyframes freed-pulse{0%,100%{box-shadow:0 0 0 0 rgba(45,122,79,.4);}50%{box-shadow:0 0 0 10px rgba(45,122,79,0);}}
 
-.cta-group{
-  display:flex;flex-direction:column;align-items:center;gap:11px;
-  animation:fu .5s .3s ease both;
-}
-.btn-main{
-  display:inline-flex;align-items:center;gap:9px;
-  background:linear-gradient(135deg,var(--rust),var(--rust2));
-  color:#fff;border:none;padding:18px 42px;border-radius:10px;
-  font-family:'Syne',sans-serif;font-size:17px;font-weight:800;
-  cursor:pointer;text-decoration:none;transition:all .25s;
-  box-shadow:0 16px 40px rgba(200,68,10,.35);letter-spacing:.2px;
-}
-.btn-main:hover{transform:translateY(-3px);box-shadow:0 24px 52px rgba(200,68,10,.45);}
-.trust-row{
-  display:flex;align-items:center;flex-wrap:wrap;justify-content:center;
-  gap:6px 16px;font-size:12px;color:var(--mid);
-}
-.trust-row span{color:var(--green);font-weight:600;}
+/* FORM */
+.booking-form{display:flex;flex-direction:column;gap:12px;}
+.field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--mid);margin-bottom:5px;}
+.field input,.field select{width:100%;background:var(--smoke);border:2px solid #3a3a3a;border-radius:8px;color:var(--cream);padding:12px 13px;font-family:'DM Sans',sans-serif;font-size:15px;transition:border .2s;appearance:none;}
+.field input:focus,.field select:focus{outline:none;border-color:var(--gold);}
+.field select option{background:#222;}
+.summary-box{background:var(--smoke);border-left:4px solid var(--accent);border-radius:8px;padding:13px;font-size:14px;line-height:1.7;margin-bottom:16px;}
+.summary-box strong{color:var(--gold);}
 
-/* phone mockup */
-.mockup-wrap{
-  margin-top:52px;position:relative;
-  animation:fu .6s .4s ease both;
-}
-.phone{
-  width:224px;margin:0 auto;
-  background:#0c0c0c;border-radius:38px;
-  border:2px solid #1c1c1c;overflow:hidden;
-  box-shadow:0 60px 120px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.04);
-  position:relative;z-index:1;
-  animation:float 4s ease-in-out infinite;
-}
-@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
-.p-notch{height:20px;background:#060606;border-radius:0 0 12px 12px;width:64px;margin:0 auto;}
-.p-body{padding:11px;background:#090909;}
-.p-head{background:#151515;border-radius:8px;padding:8px 10px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;}
-.p-logo{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:var(--gold);}
-.p-status{display:flex;align-items:center;gap:4px;font-size:8px;color:#444;}
-.p-sdot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pd 1.6s ease-in-out infinite;}
-.p-hero{background:linear-gradient(135deg,#180804,#151515);border-radius:9px;padding:13px 10px;margin-bottom:7px;text-align:center;border:1px solid #221008;}
-.p-shop{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--gold);}
-.p-name{font-size:8px;color:#444;margin:2px 0 8px;}
-.p-badge{display:inline-flex;align-items:center;gap:3px;background:#071408;border:1px solid #1a3a20;color:var(--green);padding:3px 8px;border-radius:10px;font-size:7px;font-weight:700;margin-bottom:9px;}
-.p-badge-dot{width:3px;height:3px;border-radius:50%;background:var(--green);}
-.p-btn{background:var(--rust);color:#fff;border-radius:5px;padding:6px;font-size:8px;font-weight:700;text-align:center;font-family:'Syne',sans-serif;}
-.p-label{font-size:8px;color:#3a3a3a;font-weight:700;letter-spacing:1px;margin-bottom:5px;}
-.p-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:7px;}
-.p-day{background:#141414;border-radius:6px;padding:7px 6px;border-left:3px solid var(--rust);}
-.p-day-name{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:var(--gold);}
-.p-day-slots{font-size:7px;color:#333;margin-top:1px;}<br>.p-day-slots b{color:var(--green);}
-.p-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-bottom:7px;}
-.p-slot{background:#141414;border-radius:4px;padding:5px 2px;text-align:center;font-size:8px;font-weight:600;color:#555;}
-.p-slot.sel{border:1px solid var(--gold);color:var(--gold);background:#151000;}
-.p-cta{background:linear-gradient(135deg,var(--rust),var(--rust2));color:#fff;border-radius:5px;padding:7px;font-size:8px;font-weight:700;text-align:center;font-family:'Syne',sans-serif;}
-.mockup-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:300px;height:300px;background:radial-gradient(circle,rgba(200,68,10,.18) 0%,transparent 70%);pointer-events:none;}
-@keyframes fu{from{opacity:0;transform:translateY(22px);}to{opacity:1;transform:none;}}
+/* BUTTONS */
+.btn{width:100%;padding:14px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;border:none;border-radius:8px;cursor:pointer;transition:all .2s;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{filter:brightness(1.15);transform:translateY(-1px);}
+.btn-secondary{background:var(--smoke);color:var(--cream);border:2px solid #3a3a3a;}
+.btn-secondary:hover{border-color:var(--mid);}
+.btn-danger{background:var(--red);color:#fff;}
+.btn-danger:hover{background:#c83030;transform:translateY(-1px);}
+.btn-green{background:var(--green);color:#fff;}
+.btn-green:hover{background:#35905a;transform:translateY(-1px);}
+.btn-wa{background:var(--wa);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-wa:hover{background:#1ebe5a;transform:translateY(-1px);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-sm{padding:7px 13px;font-size:13px;letter-spacing:1px;width:auto;border:none;border-radius:6px;cursor:pointer;transition:all .2s;font-family:'Bebas Neue',sans-serif;}
 
-/* ════════════════ PROBLEMA ════════════════ */
-.prob{background:var(--bg2);}
-.pain-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px;margin-top:44px;}
-.pain-card{
-  background:#0d0d0d;border:1px solid var(--border);border-radius:14px;
-  padding:22px 18px;display:flex;align-items:flex-start;gap:13px;
-  transition:all .3s;
-}
-.pain-card:hover{border-color:rgba(200,68,10,.25);transform:translateY(-2px);}
-.pain-icon{font-size:24px;flex-shrink:0;margin-top:2px;}
-.pain-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:4px;}
-.pain-desc{font-size:13px;color:rgba(245,240,232,.48);line-height:1.6;}
+/* SUCCESS */
+.success-icon{font-size:52px;text-align:center;margin:14px 0;}
+.success-card{background:var(--smoke);border:2px solid var(--green);border-radius:12px;padding:16px;margin:14px 0;}
+.success-card .row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #3a3a3a;font-size:13px;}
+.success-card .row:last-child{border:none;}
+.success-card .row span:first-child{color:var(--mid);}
+.success-card .row span:last-child{font-weight:600;}
+.cancel-section{background:#1a0a0a;border:1px solid #3a1010;border-radius:10px;padding:13px;margin-top:10px;}
+.cancel-code-box{background:#0d0d0d;border:1px solid #3a3a3a;border-radius:6px;padding:9px;text-align:center;margin-bottom:8px;}
+.cancel-code{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:6px;color:var(--gold);}
+.cancel-code-label{font-size:10px;color:var(--mid);margin-top:1px;}
+.reminder-notice{background:#0d1a2a;border:1px solid #1a3a5a;border-radius:8px;padding:11px 13px;font-size:12px;color:#6ab0e0;line-height:1.5;margin-top:8px;}
 
-/* ════════════════ SOLUÇÃO ════════════════ */
-.sol-wrap{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;}
-.sol-card{background:linear-gradient(135deg,#0e0a02,#0d0d0d);border:1px solid rgba(212,168,67,.15);border-radius:18px;padding:26px 20px;}
-.sol-row{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.04);}
-.sol-row:last-child{border:none;padding-bottom:0;}
-.sol-check{width:24px;height:24px;border-radius:50%;background:rgba(26,154,86,.14);border:1px solid rgba(26,154,86,.28);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px;}
-.sol-item strong{display:block;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:2px;}
-.sol-item span{font-size:12px;color:rgba(245,240,232,.45);line-height:1.5;}
+/* CANCEL */
+.cancel-box{background:var(--smoke);border-radius:12px;padding:22px 18px;margin-top:24px;border:1px solid #3a3a3a;}
 
-/* ════════════════ BENEFÍCIOS ════════════════ */
-.ben{background:var(--bg2);}
-.ben-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:48px;}
-.ben-card{
-  background:#0d0d0d;border:1px solid var(--border);border-radius:16px;
-  padding:26px 20px;transition:all .3s;position:relative;overflow:hidden;
-}
-.ben-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity .3s;}
-.ben-card:hover::before{opacity:1;}
-.ben-card:hover{transform:translateY(-4px);border-color:rgba(212,168,67,.15);}
-.ben-icon{font-size:30px;margin-bottom:13px;}
-.ben-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:7px;}
-.ben-desc{font-size:13px;color:rgba(245,240,232,.48);line-height:1.7;}
+/* ADMIN LOGIN */
+.login-box{background:var(--smoke);border-radius:12px;padding:26px 20px;margin-top:30px;border:1px solid #3a3a3a;}
 
-/* ════════════════ COMO FUNCIONA ════════════════ */
-.steps{display:flex;flex-direction:column;max-width:640px;margin:48px auto 0;}
-.step{display:flex;gap:20px;padding:26px 0;border-bottom:1px solid var(--border);}
-.step:last-child{border:none;}
-.step-num{
-  flex-shrink:0;width:42px;height:42px;border-radius:50%;
-  background:linear-gradient(135deg,var(--rust),var(--rust2));
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Bebas Neue',sans-serif;font-size:19px;color:#fff;
-  box-shadow:0 8px 20px rgba(200,68,10,.28);margin-top:2px;
-}
-.step h4{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:5px;}
-.step p{font-size:13px;color:rgba(245,240,232,.48);line-height:1.6;}
+/* ADMIN */
+.admin-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px;}
+.logout-btn{background:none;border:1px solid var(--mid);color:var(--mid);padding:5px 10px;border-radius:4px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;}
+.logout-btn:hover{color:var(--red);border-color:var(--red);}
+.admin-nav{display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid #2a2a2a;overflow-x:auto;scrollbar-width:none;}
+.admin-nav::-webkit-scrollbar{display:none;}
+.admin-nav-btn{flex-shrink:0;padding:8px 11px;background:none;border:none;color:var(--mid);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;white-space:nowrap;}
+.admin-nav-btn.active{color:var(--gold);border-bottom-color:var(--gold);}
+.admin-nav-btn:hover{color:var(--cream);}
 
-/* ════════════════ DEPOIMENTOS ════════════════ */
-.dep{background:var(--bg2);}
-.dep-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:14px;margin-top:46px;}
-.dep-card{background:#0d0d0d;border:1px solid var(--border);border-radius:16px;padding:24px 20px;transition:all .25s;}
-.dep-card:hover{border-color:rgba(212,168,67,.18);transform:translateY(-2px);}
-.dep-stars{color:var(--gold);letter-spacing:2px;font-size:13px;margin-bottom:11px;}
-.dep-text{font-size:14px;color:rgba(245,240,232,.68);line-height:1.75;margin-bottom:16px;font-style:italic;}
-.dep-author{display:flex;align-items:center;gap:10px;}
-.dep-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:16px;color:#fff;flex-shrink:0;}
-.dep-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
-.dep-job{font-size:11px;color:var(--mid);}
+/* LOCK BOX */
+.lock-box{background:var(--smoke);border-radius:10px;padding:17px;margin-bottom:13px;border:2px solid var(--red);}
+.lock-box.unlocked{border-color:#3a3a3a;}
+.lock-box h3{color:var(--red);margin-bottom:7px;}
+.lock-box.unlocked h3{color:var(--cream);}
+.lock-box p{font-size:12px;color:var(--mid);margin-bottom:11px;line-height:1.5;}
+.lock-status{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;margin-bottom:11px;}
+.lock-dot{width:9px;height:9px;border-radius:50%;background:var(--green);}
+.lock-dot.red{background:var(--red);animation:blink .8s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
 
-/* ════════════════ VALOR ════════════════ */
-.val-box{
-  background:linear-gradient(135deg,#0f0b02,#0d0d0d);
-  border:1px solid rgba(212,168,67,.18);border-radius:20px;
-  padding:42px 34px;max-width:680px;margin:48px auto 0;text-align:center;
-}
-.val-box h3{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,5vw,46px);letter-spacing:2px;line-height:1;margin-bottom:13px;}
-.val-box h3 em{color:var(--gold);font-style:normal;}
-.val-box p{font-size:15px;color:rgba(245,240,232,.52);line-height:1.75;max-width:500px;margin:0 auto;}
-.val-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:28px;}
-.vstat{background:#090909;border:1px solid var(--border);border-radius:12px;padding:16px 10px;text-align:center;}
-.vstat .n{font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--gold);line-height:1;}
-.vstat .l{font-size:11px;color:var(--mid);margin-top:3px;line-height:1.4;}
+/* DAY TABS */
+.day-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;scrollbar-width:none;}
+.day-tabs::-webkit-scrollbar{display:none;}
+.day-tab{flex-shrink:0;padding:6px 13px;background:var(--smoke);border:2px solid transparent;border-radius:6px;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--mid);transition:all .2s;}
+.day-tab.active{border-color:var(--gold);color:var(--gold);}
+.day-tab.is-off{text-decoration:line-through;opacity:.5;}
 
-/* ════════════════ PREÇO ════════════════ */
-.price{text-align:center;}
-.price-card{
-  background:linear-gradient(145deg,#100d02,#0d0d0d);
-  border:2px solid rgba(212,168,67,.28);border-radius:24px;
-  padding:50px 36px;max-width:430px;margin:50px auto 0;
-  position:relative;overflow:hidden;
-}
-.price-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
-.price-card::after{content:'';position:absolute;top:-80px;right:-80px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(212,168,67,.1) 0%,transparent 70%);}
-.price-ribbon{
-  display:inline-block;background:linear-gradient(135deg,var(--rust),var(--rust2));
-  color:#fff;padding:6px 18px;border-radius:20px;
-  font-family:'Syne',sans-serif;font-size:11px;font-weight:700;
-  letter-spacing:1px;text-transform:uppercase;margin-bottom:20px;
-  position:relative;z-index:1;
-}
-.price-name{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:3px;color:var(--gold);margin-bottom:5px;position:relative;z-index:1;}
-.price-desc{font-size:13px;color:var(--mid);margin-bottom:20px;position:relative;z-index:1;}
-.price-old{font-size:13px;color:var(--mid);text-decoration:line-through;margin-bottom:6px;position:relative;z-index:1;}
-.price-val{display:flex;align-items:flex-start;justify-content:center;gap:4px;margin-bottom:6px;position:relative;z-index:1;}
-.price-cur{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--gold);margin-top:10px;}
-.price-big{font-family:'Bebas Neue',sans-serif;font-size:92px;color:var(--white);line-height:1;letter-spacing:-2px;}
-.price-dec{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--white);margin-top:10px;}
-.price-period{font-size:14px;color:var(--mid);margin-bottom:28px;position:relative;z-index:1;}
-.price-list{list-style:none;text-align:left;margin-bottom:32px;display:flex;flex-direction:column;gap:11px;position:relative;z-index:1;}
-.price-list li{display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:1.5;}
-.pcheck{color:var(--green);font-weight:700;flex-shrink:0;margin-top:2px;}
-.btn-buy{
-  display:block;width:100%;padding:19px;
-  background:linear-gradient(135deg,var(--rust),var(--rust2));
-  color:#fff;border:none;border-radius:10px;
-  font-family:'Syne',sans-serif;font-size:18px;font-weight:800;
-  cursor:pointer;text-decoration:none;transition:all .25s;
-  box-shadow:0 14px 36px rgba(200,68,10,.35);text-align:center;
-  position:relative;z-index:1;
-}
-.btn-buy:hover{transform:translateY(-3px);box-shadow:0 20px 48px rgba(200,68,10,.48);}
-.price-guar{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:18px;font-size:12px;color:var(--mid);position:relative;z-index:1;}
-.price-guar b{color:var(--green);}
+/* APPOINTMENTS */
+.appointment-card{background:var(--smoke);border-radius:10px;padding:13px;margin-bottom:8px;border-left:4px solid var(--accent);transition:all .2s;}
+.appointment-card.arrived{border-color:var(--green);opacity:.7;}
+.appointment-card.cancelled-card{border-color:var(--mid);opacity:.5;}
+.appointment-card .time-badge{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold);letter-spacing:1px;}
+.appointment-card .client-name{font-weight:600;font-size:14px;margin-top:3px;}
+.appointment-card .client-phone{font-size:12px;color:var(--mid);margin-top:1px;}
+.appointment-card .card-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap;gap:6px;}
+.arrived-btn{background:var(--green);color:#fff;border:none;border-radius:6px;padding:6px 13px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;}
+.arrived-btn:hover{background:#358f5c;}
+.arrived-badge{background:#1a3a28;color:var(--green);border:1px solid var(--green);border-radius:6px;padding:4px 9px;font-size:11px;font-weight:600;}
+.cancelled-badge{background:#1a1a1a;color:var(--mid);border:1px solid #3a3a3a;border-radius:6px;padding:4px 9px;font-size:11px;font-weight:600;}
+.countdown-badge{font-size:11px;color:var(--rust);font-weight:600;background:#3a1010;padding:4px 8px;border-radius:10px;animation:blink .8s ease-in-out infinite;}
+.empty-state{text-align:center;padding:32px 0;color:var(--mid);}
+.empty-state .icon{font-size:34px;margin-bottom:9px;}
 
-/* ════════════════ GARANTIA ════════════════ */
-.guar-box{
-  background:#080f09;border:1px solid rgba(26,154,86,.22);border-radius:20px;
-  padding:42px 34px;max-width:580px;margin:0 auto;text-align:center;
-}
-.guar-icon{font-size:54px;margin-bottom:14px;}
-.guar-title{font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:2px;color:var(--green);margin-bottom:10px;}
-.guar-text{font-size:15px;color:rgba(245,240,232,.52);line-height:1.75;}
+/* SETTINGS */
+.settings-section{background:var(--smoke);border-radius:10px;padding:17px;margin-bottom:12px;}
+.settings-section h3{color:var(--gold);margin-bottom:13px;}
+.week-days-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:7px;}
+.day-toggle{padding:8px 3px;border:2px solid #3a3a3a;border-radius:7px;text-align:center;cursor:pointer;font-size:11px;font-weight:600;background:var(--smoke);color:var(--mid);transition:all .2s;user-select:none;}
+.day-toggle.on{border-color:var(--green);color:var(--green);background:#0d2a1a;}
+.time-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.interval-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:9px;}
+.off-dates-list{margin-bottom:10px;}
+.off-date-item{display:flex;justify-content:space-between;align-items:center;background:#1a1a1a;border-radius:6px;padding:8px 12px;margin-bottom:5px;font-size:12px;}
+.off-date-item .remove-btn{background:none;border:none;color:var(--red);cursor:pointer;font-size:17px;line-height:1;}
+.add-off-row{display:flex;gap:7px;}
+.add-off-row input{flex:1;background:var(--smoke);border:2px solid #3a3a3a;border-radius:8px;color:var(--cream);padding:9px 11px;font-family:'DM Sans',sans-serif;font-size:13px;}
+.add-off-row input:focus{outline:none;border-color:var(--gold);}
 
-/* ════════════════ FAQ ════════════════ */
-.faq{background:var(--bg2);}
-.faq-list{max-width:680px;margin:48px auto 0;}
-.faq-item{border-bottom:1px solid var(--border);}
-.faq-q{
-  width:100%;background:none;border:none;color:var(--white);
-  font-family:'Syne',sans-serif;font-size:15px;font-weight:600;
-  padding:20px 0;text-align:left;cursor:pointer;
-  display:flex;justify-content:space-between;align-items:center;gap:16px;
-}
-.faq-ic{font-size:22px;color:var(--gold);flex-shrink:0;transition:transform .3s;line-height:1;}
-.faq-q.open .faq-ic{transform:rotate(45deg);}
-.faq-a{font-size:14px;color:rgba(245,240,232,.5);line-height:1.75;max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s;}
-.faq-a.open{max-height:200px;padding-bottom:20px;}
+/* PASSWORD SECTION */
+.pw-section{background:var(--smoke);border-radius:10px;padding:17px;margin-bottom:12px;border:1px solid #3a2a0a;}
+.pw-section h3{color:var(--gold);margin-bottom:6px;}
+.pw-section p{font-size:12px;color:var(--mid);margin-bottom:13px;line-height:1.5;}
+.pw-strength{height:4px;border-radius:2px;margin-top:6px;background:#3a3a3a;overflow:hidden;}
+.pw-strength-bar{height:100%;border-radius:2px;transition:all .3s;width:0;}
 
-/* ════════════════ CTA FINAL ════════════════ */
-.final{
-  padding:100px 22px;text-align:center;
-  background:radial-gradient(ellipse 80% 55% at 50% 50%,rgba(200,68,10,.14) 0%,transparent 65%);
-}
-.final h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(44px,9vw,92px);letter-spacing:3px;line-height:.92;margin-bottom:18px;}
-.final h2 em{color:var(--gold);font-style:normal;display:block;}
-.final p{font-size:16px;color:rgba(245,240,232,.5);max-width:480px;margin:0 auto 36px;line-height:1.75;}
-.btn-final{
-  display:inline-flex;align-items:center;gap:10px;
-  background:linear-gradient(135deg,var(--rust),var(--rust2));
-  color:#fff;border:none;padding:20px 46px;border-radius:12px;
-  font-family:'Syne',sans-serif;font-size:18px;font-weight:800;
-  cursor:pointer;text-decoration:none;transition:all .25s;
-  box-shadow:0 18px 48px rgba(200,68,10,.38);
-}
-.btn-final:hover{transform:translateY(-3px);box-shadow:0 26px 60px rgba(200,68,10,.5);}
-.final-trust{margin-top:18px;font-size:12px;color:var(--mid);}
+/* REMINDER */
+.reminder-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #2a2a2a;font-size:13px;}
+.reminder-item:last-child{border:none;}
+.reminder-item span{color:var(--mid);font-size:12px;}
+.toggle-switch{position:relative;width:36px;height:20px;cursor:pointer;flex-shrink:0;}
+.toggle-switch input{opacity:0;width:0;height:0;}
+.slider{position:absolute;inset:0;background:#3a3a3a;border-radius:10px;transition:.3s;}
+.slider:before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s;}
+input:checked+.slider{background:var(--green);}
+input:checked+.slider:before{transform:translateX(16px);}
 
-/* ── FOOTER ── */
-footer{border-top:1px solid var(--border);padding:30px 22px;text-align:center;}
-.foot-logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:4px;color:rgba(212,168,67,.25);margin-bottom:7px;}
-footer p{font-size:12px;color:#2a2a2a;}
+.divider{border:none;border-top:1px solid #2a2a2a;margin:13px 0;}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--green);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;transition:transform .3s;z-index:1000;white-space:nowrap;max-width:92vw;text-align:center;}
+#toast.show{transform:translateX(-50%) translateY(0);}
+#toast.warn{background:var(--rust);}
 
-/* ── STICKY BOTTOM BAR (mobile) ── */
-.sticky{
-  display:none;
-  position:fixed;bottom:0;left:0;right:0;z-index:500;
-  background:rgba(7,7,7,.97);backdrop-filter:blur(14px);
-  border-top:1px solid var(--border);
-  padding:11px 18px;align-items:center;justify-content:space-between;gap:10px;
-}
-.sticky-left strong{display:block;font-family:'Syne',sans-serif;font-size:14px;color:var(--gold);}
-.sticky-left span{font-size:11px;color:var(--mid);}
-.sticky .btn-buy{width:auto;font-size:14px;padding:12px 22px;box-shadow:none;}
-
-@media(max-width:780px){
-  .sol-wrap{grid-template-columns:1fr;gap:30px;}
-  .val-stats{grid-template-columns:1fr;}
-  .sticky{display:flex;}
-  .ben-grid{grid-template-columns:1fr;}
-  .dep-grid{grid-template-columns:1fr;}
-  .pain-grid{grid-template-columns:1fr;}
-  section{padding:66px 0;}
-  .price-card{padding:32px 18px;}
-  .guar-box{padding:28px 18px;}
-  .val-box{padding:28px 18px;}
-  .hero{padding-bottom:96px;}
-}
-@media(max-width:480px){
-  .val-stats{grid-template-columns:1fr 1fr;}
-}
-
-/* ════════════════ PARA QUEM É ════════════════ */
-.forquem{background:var(--bg2);}
-.forquem-grid{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-  gap:12px;margin-top:46px;
-}
-.fq-card{
-  background:#0d0d0d;border:1px solid var(--border);border-radius:14px;
-  padding:22px 14px;text-align:center;
-  transition:all .3s;cursor:default;position:relative;overflow:hidden;
-}
-.fq-card::before{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(212,168,67,.06),transparent);
-  opacity:0;transition:opacity .3s;
-}
-.fq-card:hover::before{opacity:1;}
-.fq-card:hover{border-color:rgba(212,168,67,.28);transform:translateY(-4px);}
-.fq-icon{font-size:34px;margin-bottom:10px;}
-.fq-label{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:3px;}
-.fq-sub{font-size:11px;color:var(--mid);line-height:1.4;}
-
-/* ════════════════ DEMO MOCKUP ════════════════ */
-.demo{padding:90px 0;}
-.demo-inner{
-  display:grid;grid-template-columns:1fr 1fr;
-  gap:60px;align-items:center;
-}
-.demo-text .tag{margin-bottom:16px;}
-.demo-text h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5.5vw,60px);letter-spacing:2px;line-height:.95;margin-bottom:14px;}
-.demo-text h2 em{color:var(--gold);font-style:normal;}
-.demo-text p{font-size:15px;color:rgba(245,240,232,.52);line-height:1.8;margin-bottom:28px;}
-.demo-steps-mini{display:flex;flex-direction:column;gap:12px;}
-.dsm{display:flex;align-items:center;gap:12px;font-size:13px;}
-.dsm-num{
-  flex-shrink:0;width:26px;height:26px;border-radius:50%;
-  background:linear-gradient(135deg,var(--rust),var(--rust2));
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Bebas Neue',sans-serif;font-size:13px;color:#fff;
-}
-.dsm-text strong{display:block;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
-.dsm-text span{font-size:11px;color:var(--mid);}
-
-/* animated demo phone */
-.demo-phone-wrap{position:relative;}
-.demo-phone{
-  width:240px;margin:0 auto;
-  background:#0c0c0c;border-radius:38px;
-  border:2px solid #1c1c1c;overflow:hidden;
-  box-shadow:0 50px 100px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.04);
-}
-.demo-phone .p-notch{height:20px;background:#060606;border-radius:0 0 12px 12px;width:64px;margin:0 auto;}
-.demo-phone .p-body{padding:11px;background:#090909;min-height:400px;position:relative;}
-
-/* screens that animate in/out */
-.dscreen{
-  position:absolute;inset:11px;
-  opacity:0;transition:opacity .5s ease;
-  pointer-events:none;
-}
-.dscreen.active{opacity:1;pointer-events:auto;}
-
-/* screen 1 — landing do cliente */
-.ds1-head{background:#151515;border-radius:8px;padding:8px 10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
-.ds1-logo{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:var(--gold);}
-.ds1-hero{background:linear-gradient(135deg,#180804,#151515);border-radius:9px;padding:14px 10px;margin-bottom:8px;text-align:center;border:1px solid #220f08;}
-.ds1-shop{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;color:var(--gold);}
-.ds1-name{font-size:8px;color:#444;margin:2px 0 7px;}
-.ds1-open{display:inline-flex;align-items:center;gap:3px;background:#071408;border:1px solid #1a3a20;color:var(--green);padding:3px 8px;border-radius:10px;font-size:7px;font-weight:700;margin-bottom:8px;}
-.ds1-open-dot{width:3px;height:3px;border-radius:50%;background:var(--green);animation:pd 1.6s ease-in-out infinite;}
-.ds1-btn{background:var(--rust);color:#fff;border-radius:5px;padding:7px;font-size:9px;font-weight:700;text-align:center;font-family:'Syne',sans-serif;}
-.ds1-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:8px;}
-.ds1-strip-item{background:#111;border-radius:5px;padding:5px 3px;text-align:center;}
-.ds1-strip-day{font-size:8px;font-weight:700;color:var(--white);margin-bottom:1px;}
-.ds1-strip-cnt{font-size:7px;color:#444;}
-
-/* screen 2 — escolha do dia */
-.ds2-label{font-size:8px;color:#3a3a3a;font-weight:700;letter-spacing:1px;margin-bottom:6px;}
-.ds2-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px;}
-.ds2-day{background:#141414;border-radius:6px;padding:8px 7px;border-left:3px solid var(--rust);}
-.ds2-day.highlight{border-color:var(--gold);background:#151000;}
-.ds2-day-name{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:var(--gold);}
-.ds2-day-cnt{font-size:7px;color:#333;margin-top:1px;}
-.ds2-day-cnt b{color:var(--green);}
-
-/* screen 3 — escolha do horário */
-.ds3-back{font-size:8px;color:#444;margin-bottom:6px;}
-.ds3-title{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;color:var(--gold);margin-bottom:5px;}
-.ds3-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-bottom:7px;}
-.ds3-slot{background:#141414;border-radius:4px;padding:6px 2px;text-align:center;font-size:8px;font-weight:600;color:#555;transition:all .3s;}
-.ds3-slot.sel{border:1px solid var(--gold);color:var(--gold);background:#151000;}
-.ds3-slot.pulse-sel{animation:slot-pulse .6s ease;}
-@keyframes slot-pulse{0%{transform:scale(1);}50%{transform:scale(1.1);}100%{transform:scale(1);}}
-.ds3-btn{background:linear-gradient(135deg,var(--rust),var(--rust2));color:#fff;border-radius:5px;padding:7px;font-size:9px;font-weight:700;text-align:center;font-family:'Syne',sans-serif;}
-
-/* screen 4 — formulário */
-.ds4-back{font-size:8px;color:#444;margin-bottom:6px;}
-.ds4-summary{background:#151515;border-left:3px solid var(--rust);border-radius:5px;padding:7px 8px;margin-bottom:9px;font-size:8px;line-height:1.7;color:#888;}
-.ds4-summary b{color:var(--white);}
-.ds4-field{margin-bottom:7px;}
-.ds4-label{font-size:7px;color:#444;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}
-.ds4-input{background:#151515;border:1px solid #2a2a2a;border-radius:4px;padding:6px 7px;font-size:8px;color:var(--white);width:100%;}
-.ds4-input.filled{border-color:rgba(212,168,67,.4);color:var(--white);}
-.ds4-btn{background:linear-gradient(135deg,var(--rust),var(--rust2));color:#fff;border-radius:5px;padding:7px;font-size:9px;font-weight:700;text-align:center;font-family:'Syne',sans-serif;margin-top:4px;}
-
-/* screen 5 — sucesso */
-.ds5-icon{text-align:center;font-size:32px;margin:10px 0 6px;}
-.ds5-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;text-align:center;margin-bottom:3px;}
-.ds5-sub{font-size:8px;color:#555;text-align:center;margin-bottom:10px;}
-.ds5-card{background:#0f1a12;border:1px solid rgba(26,154,86,.25);border-radius:7px;padding:9px 10px;}
-.ds5-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1a1a1a;font-size:8px;}
-.ds5-row:last-child{border:none;}
-.ds5-row span:first-child{color:#444;}
-.ds5-row span:last-child{font-weight:700;}
-.ds5-code-box{background:#0a0a0a;border:1px solid #222;border-radius:5px;padding:7px;text-align:center;margin-top:9px;}
-.ds5-code{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:5px;color:var(--gold);}
-.ds5-code-label{font-size:7px;color:#333;}
-
-/* progress dots */
-.demo-dots{display:flex;justify-content:center;gap:6px;margin-top:16px;}
-.demo-dot{width:7px;height:7px;border-radius:50%;background:#222;transition:all .3s;cursor:pointer;}
-.demo-dot.active{background:var(--gold);transform:scale(1.2);}
-
-/* screen label */
-.demo-screen-label{
-  text-align:center;margin-top:10px;
-  font-size:11px;color:var(--mid);font-family:'Syne',sans-serif;
-  min-height:16px;transition:all .3s;
-}
-
-@media(max-width:780px){
-  .demo-inner{grid-template-columns:1fr;gap:32px;}
-  .demo-phone{width:210px;}
-  .forquem-grid{grid-template-columns:repeat(3,1fr);}
-}
-@media(max-width:420px){
-  .forquem-grid{grid-template-columns:repeat(2,1fr);}
+@media(max-width:360px){
+  .days-grid{grid-template-columns:1fr;}
+  .slots-grid{grid-template-columns:repeat(2,1fr);}
+  .week-days-grid{grid-template-columns:repeat(3,1fr);}
+  .business-types{grid-template-columns:1fr;}
 }
 </style>
 </head>
 <body>
 
-<!-- ══════════════════════════
-     1. HERO
-══════════════════════════ -->
-<section class="hero">
-  <div class="hero-aura"></div>
+<!-- FIRST-TIME SETUP WIZARD (shown if no password set) -->
+<div id="setup-wizard" style="display:none;">
+  <div class="wizard-wrap">
+    <div class="wizard-box">
 
-  <div class="hero-eyebrow">
-    <div class="pulse-dot"></div>
-    Sistema de agendamento online
-  </div>
+      <!-- Step 1: Business type -->
+      <div id="wizard-step-1">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:4px;color:var(--gold);margin-bottom:2px;">Agendio</div>
+        <div style="font-size:11px;color:var(--mid);letter-spacing:2px;margin-bottom:16px;">SISTEMA DE AGENDAMENTO</div>
+        <h2 style="font-size:22px;">Bem-vindo! 👋</h2>
+        <p class="subtitle">Vamos configurar seu sistema. Primeiro, qual é o seu negócio?</p>
+        <div class="wizard-steps"><div class="wstep active"></div><div class="wstep"></div><div class="wstep"></div></div>
+        <div class="business-types" id="btype-grid"></div>
+        <button class="btn btn-primary" onclick="wizardNext(1)">Continuar →</button>
+      </div>
 
-  <h1>
-    Pare de perder<br>
-    tempo marcando<br>
-    <span class="gold">horários</span> no<br>
-    <span class="rust">WhatsApp.</span>
-  </h1>
-
-  <p class="hero-sub">
-    O Agendio permite que seus clientes agendem horários automaticamente — <strong style="color:var(--white);">enquanto você foca no seu trabalho.</strong>
-  </p>
-
-  <div class="cta-group">
-    <a href="https://pay.kiwify.com.br/oRpQmq7" class="btn-main">
-      📅 Começar agora — R$14,90/mês
-    </a>
-    <div class="trust-row">
-      <span>✓</span> 7 dias de garantia
-      &nbsp;·&nbsp;
-      <span>✓</span> Sem instalar nada
-      &nbsp;·&nbsp;
-      <span>✓</span> Cancele quando quiser
-    </div>
-  </div>
-
-  <!-- Mockup -->
-  <div class="mockup-wrap">
-    <div class="mockup-glow"></div>
-    <div class="phone">
-      <div class="p-notch"></div>
-      <div class="p-body">
-        <div class="p-head">
-          <div class="p-logo">Agendio</div>
-          <div class="p-status"><div class="p-sdot"></div>aberto</div>
+      <!-- Step 2: Business info -->
+      <div id="wizard-step-2" style="display:none;">
+        <div class="wizard-icon" id="wizard-btype-icon">✂️</div>
+        <h2>Sobre seu negócio</h2>
+        <p class="subtitle">Como seus clientes vão te reconhecer?</p>
+        <div class="wizard-steps"><div class="wstep done"></div><div class="wstep active"></div><div class="wstep"></div></div>
+        <div class="booking-form" style="margin-bottom:18px;text-align:left;">
+          <div class="field"><label>Nome do negócio</label><input type="text" id="wiz-shop-name" placeholder="Ex: Studio da Ana" maxlength="50"></div>
+          <div class="field"><label>Seu nome (profissional)</label><input type="text" id="wiz-barber-name" placeholder="Ex: Ana Lima" maxlength="40"></div>
+          <div class="field"><label>Número do WhatsApp (com DDD)</label><input type="tel" id="wiz-wa-number" placeholder="11999999999" maxlength="15"></div>
         </div>
-        <div class="p-hero">
-          <div class="p-shop">Barbearia do João</div>
-          <div class="p-name">João Silva · Barbeiro</div>
-          <div class="p-badge"><div class="p-badge-dot"></div>Aberto agora</div>
-          <div class="p-btn">📅 Agendar Agora</div>
-        </div>
-        <div class="p-label">ESCOLHA O DIA</div>
-        <div class="p-grid">
-          <div class="p-day"><div class="p-day-name">Segunda</div><div class="p-day-slots"><b>4</b> livres</div></div>
-          <div class="p-day"><div class="p-day-name">Terça</div><div class="p-day-slots"><b>6</b> livres</div></div>
-          <div class="p-day"><div class="p-day-name">Quarta</div><div class="p-day-slots"><b>2</b> livres</div></div>
-          <div class="p-day"><div class="p-day-name">Quinta</div><div class="p-day-slots"><b>5</b> livres</div></div>
-        </div>
-        <div class="p-label">HORÁRIOS — SEGUNDA</div>
-        <div class="p-slots">
-          <div class="p-slot">09:00</div>
-          <div class="p-slot sel">10:00</div>
-          <div class="p-slot">11:00</div>
-          <div class="p-slot">14:00</div>
-          <div class="p-slot">15:00</div>
-          <div class="p-slot">16:00</div>
-        </div>
-        <div class="p-cta">Confirmar Agendamento →</div>
+        <button class="btn btn-primary" onclick="wizardNext(2)">Continuar →</button>
+        <button class="back-btn" onclick="wizardBack(1)" style="margin-top:10px;width:100%;justify-content:center;">← Voltar</button>
       </div>
-    </div>
-  </div>
-</section>
 
-<div class="divider"></div>
-
-<!-- ══════════════════════════
-     2. PROBLEMA
-══════════════════════════ -->
-<section class="prob">
-  <div class="c">
-    <div class="sr" style="text-align:center;">
-      <div class="tag">Você se identifica?</div>
-      <h2 class="display">Isso acontece todo dia<br><em>na sua agenda</em></h2>
-      <p class="sec-sub" style="margin:0 auto 0;">Profissionais autônomos perdem em média <strong style="color:var(--white);">2 horas por dia</strong> só respondendo mensagens para marcar horário. Dá mais de 60 horas por mês jogadas fora.</p>
-    </div>
-    <div class="pain-grid">
-      <div class="pain-card sr sr-d1">
-        <div class="pain-icon">📱</div>
-        <div>
-          <div class="pain-title">WhatsApp virou sua agenda</div>
-          <div class="pain-desc">Você responde "que horário tem?" o dia inteiro e ainda corre o risco de marcar errado.</div>
-        </div>
-      </div>
-      <div class="pain-card sr sr-d2">
-        <div class="pain-icon">😤</div>
-        <div>
-          <div class="pain-title">Clientes que somem</div>
-          <div class="pain-desc">Você demora 10 minutos para responder e o cliente já foi embora buscar a concorrência.</div>
-        </div>
-      </div>
-      <div class="pain-card sr sr-d3">
-        <div class="pain-icon">🌙</div>
-        <div>
-          <div class="pain-title">Mensagens fora de hora</div>
-          <div class="pain-desc">Chegam à noite e no fim de semana — enquanto você está atendendo ou descansando.</div>
-        </div>
-      </div>
-      <div class="pain-card sr sr-d1">
-        <div class="pain-icon">📋</div>
-        <div>
-          <div class="pain-title">Agenda uma bagunça</div>
-          <div class="pain-desc">Horários anotados em vários lugares, sem controle — e sempre tem dupla marcação.</div>
-        </div>
-      </div>
-      <div class="pain-card sr sr-d2">
-        <div class="pain-icon">😰</div>
-        <div>
-          <div class="pain-title">Horários vazios</div>
-          <div class="pain-desc">Clientes cancelam de última hora e você não consegue preencher o buraco a tempo.</div>
-        </div>
-      </div>
-      <div class="pain-card sr sr-d3">
-        <div class="pain-icon">💔</div>
-        <div>
-          <div class="pain-title">Imagem pouco profissional</div>
-          <div class="pain-desc">Seu concorrente já tem link de agendamento. Seus clientes estão percebendo a diferença.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- ══════════════════════════
-     PARA QUEM É
-══════════════════════════ -->
-<section class="forquem">
-  <div class="c">
-    <div class="sr" style="text-align:center;">
-      <div class="tag">Para quem é</div>
-      <h2 class="display">O Agendio é <em>perfeito</em><br>para o seu negócio</h2>
-      <p class="sec-sub" style="margin:0 auto;">Quando você vê sua profissão aqui, sabe que o sistema foi feito pensando em você.</p>
-    </div>
-    <div class="forquem-grid">
-      <div class="fq-card sr sr-d1">
-        <div class="fq-icon">💈</div>
-        <div class="fq-label">Barbearia</div>
-        <div class="fq-sub">Barber shops e cabelereiros masculinos</div>
-      </div>
-      <div class="fq-card sr sr-d2">
-        <div class="fq-icon">💇</div>
-        <div class="fq-label">Salão de Beleza</div>
-        <div class="fq-sub">Cabelereiros e hair stylists</div>
-      </div>
-      <div class="fq-card sr sr-d3">
-        <div class="fq-icon">💅</div>
-        <div class="fq-label">Manicure & Nail</div>
-        <div class="fq-sub">Nail designers e podólogos</div>
-      </div>
-      <div class="fq-card sr sr-d1">
-        <div class="fq-icon">✨</div>
-        <div class="fq-label">Estética</div>
-        <div class="fq-sub">Esteticistas e clínicas de estética</div>
-      </div>
-      <div class="fq-card sr sr-d2">
-        <div class="fq-icon">🎨</div>
-        <div class="fq-label">Estúdio de Tattoo</div>
-        <div class="fq-sub">Tatuadores e artistas corporais</div>
-      </div>
-      <div class="fq-card sr sr-d3">
-        <div class="fq-icon">💪</div>
-        <div class="fq-label">Personal Trainer</div>
-        <div class="fq-sub">Professores e coaches fitness</div>
-      </div>
-      <div class="fq-card sr sr-d1">
-        <div class="fq-icon">🏥</div>
-        <div class="fq-label">Clínica de Saúde</div>
-        <div class="fq-sub">Fisioterapeutas e massoterapeutas</div>
-      </div>
-      <div class="fq-card sr sr-d2">
-        <div class="fq-icon">📚</div>
-        <div class="fq-label">Professor Particular</div>
-        <div class="fq-sub">Tutores e professores de idiomas</div>
-      </div>
-      <div class="fq-card sr sr-d3">
-        <div class="fq-icon">🏪</div>
-        <div class="fq-label">Qualquer negócio</div>
-        <div class="fq-sub">Se você vende tempo, o Agendio é para você</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- ══════════════════════════
-     3. SOLUÇÃO
-══════════════════════════ -->
-<section>
-  <div class="c">
-    <div class="sol-wrap">
-      <div class="sr">
-        <div class="tag green">A solução</div>
-        <h2 class="display">Sua agenda online.<br><em>Automática.</em><br>24 horas.</h2>
-        <p style="font-size:15px;color:rgba(245,240,232,.52);line-height:1.8;margin-bottom:22px;">O Agendio cria um link de agendamento personalizado para o seu negócio. Seus clientes abrem, veem os horários disponíveis e marcam sozinhos. Sem precisar falar com você.</p>
-        <a href="https://pay.kiwify.com.br/oRpQmq7" class="btn-main" style="font-size:15px;padding:14px 30px;display:inline-flex;">
-          Quero o meu agora →
-        </a>
-      </div>
-      <div class="sol-card sr">
-        <div class="sol-row">
-          <div class="sol-check">✓</div>
-          <div class="sol-item">
-            <strong>Agendamento automático 24h</strong>
-            <span>Clientes marcam mesmo quando você está atendendo ou dormindo</span>
+      <!-- Step 3: Create password -->
+      <div id="wizard-step-3" style="display:none;">
+        <div class="wizard-icon">🔐</div>
+        <h2>Crie sua senha</h2>
+        <p class="subtitle">Esta senha protege o painel administrativo. Escolha uma senha que só você saiba.</p>
+        <div class="wizard-steps"><div class="wstep done"></div><div class="wstep done"></div><div class="wstep active"></div></div>
+        <div class="booking-form" style="margin-bottom:18px;text-align:left;">
+          <div class="field">
+            <label>Nova senha</label>
+            <input type="password" id="wiz-pw1" placeholder="Mínimo 4 caracteres" maxlength="30" oninput="checkPwStrength('wiz-pw1','pw-strength-bar')">
+            <div class="pw-strength"><div class="pw-strength-bar" id="pw-strength-bar"></div></div>
           </div>
+          <div class="field"><label>Confirmar senha</label><input type="password" id="wiz-pw2" placeholder="Repita a senha" maxlength="30"></div>
         </div>
-        <div class="sol-row">
-          <div class="sol-check">✓</div>
-          <div class="sol-item">
-            <strong>Regra dos 10 minutos</strong>
-            <span>Cliente não chegou? O horário é liberado automaticamente</span>
-          </div>
-        </div>
-        <div class="sol-row">
-          <div class="sol-check">✓</div>
-          <div class="sol-item">
-            <strong>Integração com WhatsApp</strong>
-            <span>Envie confirmações e lembretes com um único clique</span>
-          </div>
-        </div>
-        <div class="sol-row">
-          <div class="sol-check">✓</div>
-          <div class="sol-item">
-            <strong>Painel administrativo completo</strong>
-            <span>Toda sua agenda organizada, dia a dia, no celular</span>
-          </div>
-        </div>
-        <div class="sol-row">
-          <div class="sol-check">✓</div>
-          <div class="sol-item">
-            <strong>Bloqueio de emergência</strong>
-            <span>Surgiu um imprevisto? Feche sua agenda em um toque</span>
-          </div>
-        </div>
-        <div class="sol-row">
-          <div class="sol-check">✓</div>
-          <div class="sol-item">
-            <strong>Código de cancelamento</strong>
-            <span>O cliente cancela sozinho pelo link — sem te chamar</span>
-          </div>
-        </div>
+        <button class="btn btn-primary" onclick="wizardFinish()">Criar sistema ✓</button>
+        <button class="back-btn" onclick="wizardBack(2)" style="margin-top:10px;width:100%;justify-content:center;">← Voltar</button>
       </div>
+
     </div>
   </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- ══════════════════════════
-     4. BENEFÍCIOS
-══════════════════════════ -->
-<section class="ben">
-  <div class="c">
-    <div class="sr" style="text-align:center;">
-      <div class="tag">Benefícios</div>
-      <h2 class="display">Tudo que você precisa.<br><em>Nada que não precisa.</em></h2>
-    </div>
-    <div class="ben-grid">
-      <div class="ben-card sr sr-d1">
-        <div class="ben-icon">🕐</div>
-        <div class="ben-title">Agendamento Automático</div>
-        <div class="ben-desc">Seus clientes marcam horários disponíveis sozinhos, sem precisar falar com você. Funciona 24h, 7 dias por semana.</div>
-      </div>
-      <div class="ben-card sr sr-d2">
-        <div class="ben-icon">📋</div>
-        <div class="ben-title">Agenda Organizada</div>
-        <div class="ben-desc">Todos os horários ficam registrados em um só lugar, com nome e telefone de cada cliente. Chega de papel e confusão.</div>
-      </div>
-      <div class="ben-card sr sr-d3">
-        <div class="ben-icon">⚡</div>
-        <div class="ben-title">Mais Produtividade</div>
-        <div class="ben-desc">Pare de perder tempo respondendo mensagens. Foque 100% no atendimento e aumente sua renda mensal.</div>
-      </div>
-      <div class="ben-card sr sr-d1">
-        <div class="ben-icon">💼</div>
-        <div class="ben-title">Imagem Profissional</div>
-        <div class="ben-desc">Ter um sistema de agendamento passa muito mais confiança. Seus clientes vão perceber — e comentar.</div>
-      </div>
-      <div class="ben-card sr sr-d2">
-        <div class="ben-icon">📲</div>
-        <div class="ben-title">Lembretes pelo WhatsApp</div>
-        <div class="ben-desc">Envie lembretes com um clique para reduzir faltas e cancelamentos de última hora.</div>
-      </div>
-      <div class="ben-card sr sr-d3">
-        <div class="ben-icon">📱</div>
-        <div class="ben-title">100% no Celular</div>
-        <div class="ben-desc">Otimizado para mobile. Você gerencia sua agenda pelo celular. Seus clientes agendam pelo celular deles.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- ══════════════════════════
-     5. COMO FUNCIONA
-══════════════════════════ -->
-<section>
-  <div class="c">
-    <div class="sr" style="text-align:center;">
-      <div class="tag">Como funciona</div>
-      <h2 class="display">Pronto em menos<br>de <em>5 minutos</em></h2>
-      <p class="sec-sub" style="margin:0 auto;">Sem instalar nada. Sem saber de tecnologia. Se você usa WhatsApp, você usa o Agendio.</p>
-    </div>
-    <div class="steps">
-      <div class="step sr">
-        <div class="step-num">1</div>
-        <div>
-          <h4>Você cria sua agenda no sistema</h4>
-          <p>Acesse o Agendio, configure seu tipo de negócio, nome, horários de trabalho e duração de cada atendimento. Em 2 minutos está pronto.</p>
-        </div>
-      </div>
-      <div class="step sr">
-        <div class="step-num">2</div>
-        <div>
-          <h4>Compartilha seu link de agendamento</h4>
-          <p>Você recebe um link único. Manda no WhatsApp, coloca na bio do Instagram, no Google Meu Negócio, onde quiser.</p>
-        </div>
-      </div>
-      <div class="step sr">
-        <div class="step-num">3</div>
-        <div>
-          <h4>Clientes escolhem o horário disponível</h4>
-          <p>Eles abrem o link, veem os dias e horários livres, escolhem e colocam nome e telefone. Sem cadastro, sem app.</p>
-        </div>
-      </div>
-      <div class="step sr">
-        <div class="step-num">4</div>
-        <div>
-          <h4>O sistema reserva automaticamente</h4>
-          <p>O horário é bloqueado na hora. Você vê tudo no painel e só precisa aparecer para atender.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- ══════════════════════════
-     6. DEPOIMENTOS
-══════════════════════════ -->
-<section class="dep">
-  <div class="c">
-    <div class="sr" style="text-align:center;">
-      <div class="tag">Depoimentos</div>
-      <h2 class="display">Quem já usa<br><em>o Agendio</em></h2>
-    </div>
-    <div class="dep-grid">
-      <div class="dep-card sr sr-d1">
-        <div class="dep-stars">★★★★★</div>
-        <div class="dep-text">"Minha barbearia ficou completamente diferente. Antes eu ficava o dia inteiro no WhatsApp. Agora os clientes agendam sozinhos e eu só apareço para trabalhar."</div>
-        <div class="dep-author">
-          <div class="dep-avatar" style="background:linear-gradient(135deg,#c8440a,#e05510);">C</div>
-          <div>
-            <div class="dep-name">Carlos Eduardo</div>
-            <div class="dep-job">Barbeiro · Rio de Janeiro</div>
-          </div>
-        </div>
-      </div>
-      <div class="dep-card sr sr-d2">
-        <div class="dep-stars">★★★★★</div>
-        <div class="dep-text">"Agora meus clientes agendam sozinhos e eu não fico mais presa ao WhatsApp. Minha produtividade dobrou e consigo atender muito mais gente por mês."</div>
-        <div class="dep-author">
-          <div class="dep-avatar" style="background:linear-gradient(135deg,#b0308a,#d04aaa);">M</div>
-          <div>
-            <div class="dep-name">Mariana Costa</div>
-            <div class="dep-job">Manicure · São Paulo</div>
-          </div>
-        </div>
-      </div>
-      <div class="dep-card sr sr-d3">
-        <div class="dep-stars">★★★★★</div>
-        <div class="dep-text">"Como personal trainer minha agenda era um caos. Com o Agendio cada aluno escolhe o horário e eu consigo planejar minha semana inteira com antecedência."</div>
-        <div class="dep-author">
-          <div class="dep-avatar" style="background:linear-gradient(135deg,#c87010,#e09030);">R</div>
-          <div>
-            <div class="dep-name">Rafael Mendes</div>
-            <div class="dep-job">Personal Trainer · BH</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- ══════════════════════════
-     7. VALOR
-══════════════════════════ -->
-<section>
-  <div class="c">
-    <div class="sr" style="text-align:center;">
-      <div class="tag">Quanto vale seu tempo?</div>
-      <h2 class="display">A conta<br><em>é simples</em></h2>
-    </div>
-    <div class="val-box sr">
-      <h3>1 cliente a mais por mês<br>já paga <em>o sistema inteiro</em></h3>
-      <p>Se você cobra R$50 por atendimento, basta um agendamento a mais por mês para o Agendio se pagar. Na prática, profissionais que usam o sistema relatam ganhar entre 3 e 8 atendimentos extras por mês — porque a agenda fica acessível o tempo todo.</p>
-      <div class="val-stats">
-        <div class="vstat">
-          <div class="n">2h</div>
-          <div class="l">economizadas por dia em mensagens</div>
-        </div>
-        <div class="vstat">
-          <div class="n">24h</div>
-          <div class="l">sua agenda disponível para clientes</div>
-        </div>
-        <div class="vstat">
-          <div class="n">5min</div>
-          <div class="l">para configurar e já começar</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- ══════════════════════════
-     8. OFERTA
-══════════════════════════ -->
-<section class="price">
-  <div class="c">
-    <div class="sr">
-      <div class="tag" style="display:block;text-align:center;max-width:200px;margin:0 auto 16px;">Investimento</div>
-      <h2 class="display" style="text-align:center;">Um preço justo.<br><em>Para quem trabalha duro.</em></h2>
-    </div>
-    <div class="price-card sr">
-      <div class="price-ribbon">🔥 Preço de lançamento</div>
-      <div class="price-name">Plano Pioneiro</div>
-      <div class="price-desc">Para os primeiros usuários do Agendio</div>
-      <div class="price-old">De R$29,90/mês</div>
-      <div class="price-val">
-        <span class="price-cur">R$</span>
-        <span class="price-big">14</span>
-        <span class="price-dec">,90</span>
-      </div>
-      <div class="price-period">por mês · cancele quando quiser</div>
-      <ul class="price-list">
-        <li><span class="pcheck">✓</span> Agendamentos ilimitados</li>
-        <li><span class="pcheck">✓</span> Painel administrativo completo</li>
-        <li><span class="pcheck">✓</span> Integração com WhatsApp</li>
-        <li><span class="pcheck">✓</span> Regra dos 10 minutos (no-show automático)</li>
-        <li><span class="pcheck">✓</span> Bloqueio de emergência</li>
-        <li><span class="pcheck">✓</span> Código de cancelamento para clientes</li>
-        <li><span class="pcheck">✓</span> Funciona em qualquer celular</li>
-        <li><span class="pcheck">✓</span> Suporte pelo WhatsApp</li>
-      </ul>
-      <a href="https://pay.kiwify.com.br/oRpQmq7" class="btn-buy">
-        Começar agora por R$14,90/mês →
-      </a>
-      <div class="price-guar">
-        🛡️ <b>Garantia de 7 dias</b> — devolução 100% sem perguntas
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="divider" style="margin-top:88px;"></div>
-
-<!-- ══════════════════════════
-     9. GARANTIA
-══════════════════════════ -->
-<section style="background:var(--bg2);">
-  <div class="c">
-    <div class="guar-box sr">
-      <div class="guar-icon">🛡️</div>
-      <div class="guar-title">Garantia de 7 dias</div>
-      <div class="guar-text">
-        Experimente o Agendio por 7 dias completos. Se por qualquer motivo você não gostar — é só nos chamar e devolvemos 100% do seu dinheiro. Sem burocracia, sem perguntas, sem enrolação.<br><br>
-        <strong style="color:var(--white);">Você não tem nada a perder. Só a ganhar.</strong>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- ══════════════════════════
-     DEMO — SISTEMA AO VIVO
-══════════════════════════ -->
-<section class="demo">
-  <div class="c">
-    <div class="demo-inner">
-      <div class="demo-text sr">
-        <div class="tag">Veja funcionando</div>
-        <h2>É exatamente assim<br>que o seu cliente<br><em>vai agendar.</em></h2>
-        <p>Do lado direito você está vendo o sistema em tempo real. É assim que seus clientes vão enxergar quando acessarem o link da sua agenda.</p>
-        <div class="demo-steps-mini">
-          <div class="dsm">
-            <div class="dsm-num">1</div>
-            <div class="dsm-text"><strong>Vê sua página com horários disponíveis</strong><span>Aberta, profissional, direto no celular</span></div>
-          </div>
-          <div class="dsm">
-            <div class="dsm-num">2</div>
-            <div class="dsm-text"><strong>Escolhe o dia e o horário</strong><span>Só aparecem os horários livres</span></div>
-          </div>
-          <div class="dsm">
-            <div class="dsm-num">3</div>
-            <div class="dsm-text"><strong>Coloca nome e telefone</strong><span>Sem cadastro, sem app, sem senha</span></div>
-          </div>
-          <div class="dsm">
-            <div class="dsm-num">4</div>
-            <div class="dsm-text"><strong>Agendamento confirmado</strong><span>Você recebe, o horário fica bloqueado</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="demo-phone-wrap sr sr-d2">
-        <div class="demo-phone">
-          <div class="p-notch"></div>
-          <div class="p-body" style="min-height:440px;position:relative;">
-
-            <!-- TELA 1: Landing do cliente -->
-            <div class="dscreen active" id="ds1">
-              <div class="ds1-head">
-                <div class="ds1-logo">Agendio</div>
-                <div style="display:flex;align-items:center;gap:4px;font-size:7px;color:#333;"><div class="ds1-open-dot"></div>aberto</div>
-              </div>
-              <div class="ds1-hero">
-                <div class="ds1-shop">Barbearia do João</div>
-                <div class="ds1-name">João Silva · Barbeiro</div>
-                <div class="ds1-open"><div class="ds1-open-dot"></div>Aberto agora</div>
-                <div class="ds1-btn">📅 Agendar Agora</div>
-              </div>
-              <div style="font-size:7px;color:#333;font-weight:700;letter-spacing:1px;margin-bottom:5px;">PRÓXIMOS DIAS</div>
-              <div class="ds1-strip">
-                <div class="ds1-strip-item"><div class="ds1-strip-day">Seg</div><div class="ds1-strip-cnt">4 livres</div></div>
-                <div class="ds1-strip-item"><div class="ds1-strip-day">Ter</div><div class="ds1-strip-cnt">6 livres</div></div>
-                <div class="ds1-strip-item"><div class="ds1-strip-day">Qua</div><div class="ds1-strip-cnt">2 livres</div></div>
-              </div>
-            </div>
-
-            <!-- TELA 2: Escolha o dia -->
-            <div class="dscreen" id="ds2">
-              <div style="font-size:8px;color:#444;margin-bottom:8px;">← Voltar</div>
-              <div class="ds2-label">ESCOLHA O DIA</div>
-              <div class="ds2-grid">
-                <div class="ds2-day highlight"><div class="ds2-day-name">Segunda</div><div class="ds2-day-cnt"><b>4</b> livres</div></div>
-                <div class="ds2-day"><div class="ds2-day-name">Terça</div><div class="ds2-day-cnt"><b>6</b> livres</div></div>
-                <div class="ds2-day"><div class="ds2-day-name">Quarta</div><div class="ds2-day-cnt"><b>2</b> livres</div></div>
-                <div class="ds2-day"><div class="ds2-day-name">Quinta</div><div class="ds2-day-cnt"><b>5</b> livres</div></div>
-                <div class="ds2-day"><div class="ds2-day-name">Sexta</div><div class="ds2-day-cnt"><b>3</b> livres</div></div>
-                <div class="ds2-day"><div class="ds2-day-name">Sábado</div><div class="ds2-day-cnt"><b>4</b> livres</div></div>
-              </div>
-            </div>
-
-            <!-- TELA 3: Escolha o horário -->
-            <div class="dscreen" id="ds3">
-              <div class="ds3-back">← Voltar</div>
-              <div class="ds3-title">Segunda, 24 Mar</div>
-              <div class="ds3-grid">
-                <div class="ds3-slot">09:00</div>
-                <div class="ds3-slot sel pulse-sel" id="ds3-sel">10:00</div>
-                <div class="ds3-slot">11:00</div>
-                <div class="ds3-slot">14:00</div>
-                <div class="ds3-slot">15:00</div>
-                <div class="ds3-slot">16:00</div>
-              </div>
-              <div class="ds3-btn">Continuar →</div>
-            </div>
-
-            <!-- TELA 4: Formulário -->
-            <div class="dscreen" id="ds4">
-              <div class="ds4-back">← Voltar</div>
-              <div style="font-size:10px;font-family:'Bebas Neue',sans-serif;letter-spacing:1px;margin-bottom:6px;">Seus Dados</div>
-              <div class="ds4-summary">
-                <b>📅 Segunda, 24 Mar</b><br>
-                🕐 10:00 · Barbearia do João
-              </div>
-              <div class="ds4-field">
-                <div class="ds4-label">Nome completo</div>
-                <div class="ds4-input filled">Carlos Mendes</div>
-              </div>
-              <div class="ds4-field">
-                <div class="ds4-label">WhatsApp / Telefone</div>
-                <div class="ds4-input filled">(21) 99999-0000</div>
-              </div>
-              <div class="ds4-btn">Confirmar Agendamento</div>
-            </div>
-
-            <!-- TELA 5: Sucesso -->
-            <div class="dscreen" id="ds5">
-              <div class="ds5-icon">✅</div>
-              <div class="ds5-title">Agendado!</div>
-              <div class="ds5-sub">Horário confirmado com sucesso</div>
-              <div class="ds5-card">
-                <div class="ds5-row"><span>Cliente</span><span>Carlos Mendes</span></div>
-                <div class="ds5-row"><span>Dia</span><span>Seg, 24 Mar</span></div>
-                <div class="ds5-row"><span>Horário</span><span style="color:var(--gold);">10:00</span></div>
-                <div class="ds5-row"><span>Local</span><span>Barbearia do João</span></div>
-              </div>
-              <div class="ds5-code-box">
-                <div class="ds5-code">B7F2</div>
-                <div class="ds5-code-label">Código de cancelamento</div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-        <div class="demo-dots">
-          <div class="demo-dot active" onclick="goToScreen(0)"></div>
-          <div class="demo-dot" onclick="goToScreen(1)"></div>
-          <div class="demo-dot" onclick="goToScreen(2)"></div>
-          <div class="demo-dot" onclick="goToScreen(3)"></div>
-          <div class="demo-dot" onclick="goToScreen(4)"></div>
-        </div>
-        <div class="demo-screen-label" id="demo-label">Tela inicial — o que seu cliente vê</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- ══════════════════════════
-     10. FAQ
-══════════════════════════ -->
-<section class="faq">
-  <div class="c">
-    <div class="sr" style="text-align:center;">
-      <div class="tag">Dúvidas</div>
-      <h2 class="display">Perguntas<br><em>frequentes</em></h2>
-    </div>
-    <div class="faq-list">
-      <div class="faq-item">
-        <button class="faq-q" onclick="faq(this)">Preciso instalar algum aplicativo? <span class="faq-ic">+</span></button>
-        <div class="faq-a">Não. O Agendio funciona 100% pelo navegador do celular ou computador — Chrome, Safari, Firefox. Você e seus clientes acessam pelo link, sem baixar nada.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="faq(this)">Meus clientes precisam criar cadastro? <span class="faq-ic">+</span></button>
-        <div class="faq-a">Não. Seus clientes abrem o link, escolhem o horário, colocam nome e telefone. Pronto. Sem cadastro, sem senha, sem complicação nenhuma.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="faq(this)">Funciona bem no celular? <span class="faq-ic">+</span></button>
-        <div class="faq-a">Sim, o Agendio foi criado pensando primeiro no celular. Tanto o painel de administrador quanto a tela de agendamento dos clientes são 100% otimizados para mobile.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="faq(this)">Posso configurar meus próprios horários? <span class="faq-ic">+</span></button>
-        <div class="faq-a">Sim. Você define os dias da semana que trabalha, o horário de início e fim, a duração de cada atendimento, a pausa do almoço, folgas e feriados específicos.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="faq(this)">O que acontece se eu cancelar a assinatura? <span class="faq-ic">+</span></button>
-        <div class="faq-a">Você perde o acesso ao final do período já pago. Sem multa, sem fidelidade mínima. Cancele quando quiser, direto pelo painel da Kiwify.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="faq(this)">Tenho suporte se precisar de ajuda? <span class="faq-ic">+</span></button>
-        <div class="faq-a">Sim. O suporte é pelo WhatsApp. Se tiver qualquer dúvida na configuração ou no uso, é só chamar que respondemos o mais rápido possível.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- ══════════════════════════
-     11. CTA FINAL
-══════════════════════════ -->
-<section class="final">
-  <div class="container" style="max-width:1040px;margin:0 auto;">
-    <h2 class="sr">
-      Chega de perder<br>
-      cliente por<br>
-      <em>falta de resposta.</em>
-    </h2>
-    <p class="sr sr-d1">Por R$14,90 por mês — menos que uma pizza — você transforma a gestão do seu negócio. Atende mais, ganha mais, estresa menos.</p>
-    <a href="https://pay.kiwify.com.br/oRpQmq7" class="btn-final sr sr-d2">
-      📅 Começar a usar o Agendio agora →
-    </a>
-    <div class="final-trust sr sr-d3">
-      🛡️ 7 dias de garantia &nbsp;·&nbsp; ✓ Sem instalar nada &nbsp;·&nbsp; ✓ Cancele quando quiser
-    </div>
-  </div>
-</section>
-
-<footer>
-  <div class="foot-logo">Agendio</div>
-  <p>© 2025 Agendio · Sistema de Agendamento Online</p>
-</footer>
-
-<!-- STICKY BAR mobile -->
-<div class="sticky" id="sticky">
-  <div class="sticky-left">
-    <strong>Agendio — R$14,90/mês</strong>
-    <span>7 dias de garantia · Cancele quando quiser</span>
-  </div>
-  <a href="https://pay.kiwify.com.br/oRpQmq7" class="btn-buy">Começar →</a>
 </div>
 
+<!-- MAIN APP -->
+<div id="main-app" style="display:none;">
+
+<header>
+  <div class="logo">
+    <span id="header-shop-name">Agendio</span>
+    <small id="header-biz-type">Sistema de Agendamento</small>
+  </div>
+  <a href="#" class="admin-link" onclick="goToLogin();return false;">Admin</a>
+</header>
+<div id="lock-banner" class="lock-banner">🔒 Agenda fechada temporariamente — tente novamente mais tarde</div>
+<div id="toast"></div>
+
+<!-- LANDING -->
+<div id="screen-landing" class="screen active">
+  <div class="landing-hero">
+    <div class="biz-type-label" id="hero-biz-label"></div>
+    <h1 id="hero-shop-name">Seu Negócio</h1>
+    <div class="barber-name" id="hero-barber-name"></div>
+    <div class="shop-address" id="hero-address"></div>
+    <div id="open-status-badge"></div>
+    <div class="hours-strip" id="hours-strip"></div>
+    <button class="btn btn-primary" onclick="showScreen('screen-days')" style="max-width:260px;margin:0 auto;display:block;font-size:17px;">📅 Agendar Agora</button>
+  </div>
+  <div id="hot-slots-section" style="display:none;"></div>
+  <div style="text-align:center;margin-top:6px;">
+    <button class="back-btn" onclick="showCancelScreen()" style="font-size:12px;">Cancelar um agendamento</button>
+  </div>
+  <div style="text-align:center;padding:20px 0 8px;font-size:11px;color:#333;letter-spacing:1px;">
+    Powered by <span style="font-family:'Bebas Neue',sans-serif;letter-spacing:2px;color:#444;font-size:13px;">Agendio</span>
+  </div>
+</div>
+
+<!-- DAYS -->
+<div id="screen-days" class="screen">
+  <button class="back-btn" onclick="showScreen('screen-landing')">← Voltar</button>
+  <h2>Escolha o Dia</h2>
+  <p class="subtitle">Dias disponíveis para agendamento</p>
+  <div class="days-grid" id="days-grid"></div>
+</div>
+
+<!-- SLOTS -->
+<div id="screen-slots" class="screen">
+  <button class="back-btn" onclick="showScreen('screen-days')">← Voltar</button>
+  <h2 id="slots-day-title"></h2>
+  <p class="subtitle" id="slots-day-date"></p>
+  <div class="slots-grid" id="slots-grid"></div>
+  <button class="btn btn-primary" id="btn-continue-slots" disabled onclick="showFormScreen()">Continuar</button>
+</div>
+
+<!-- FORM -->
+<div id="screen-form" class="screen">
+  <button class="back-btn" onclick="showScreen('screen-slots')">← Voltar</button>
+  <h2>Seus Dados</h2>
+  <p class="subtitle">Confirme o horário abaixo</p>
+  <div class="summary-box" id="booking-summary"></div>
+  <div class="booking-form">
+    <div class="field"><label>Nome completo</label><input type="text" id="client-name" placeholder="Ex: João Silva" maxlength="60"></div>
+    <div class="field"><label>WhatsApp / Telefone</label><input type="tel" id="client-phone" placeholder="(11) 99999-9999" maxlength="20"></div>
+    <button class="btn btn-primary" onclick="confirmBooking()">Confirmar Agendamento</button>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div id="screen-success" class="screen">
+  <div class="success-icon">✅</div>
+  <h2 style="text-align:center;">Agendado!</h2>
+  <p class="subtitle" style="text-align:center;">Seu horário está confirmado</p>
+  <div class="success-card" id="success-details"></div>
+  <button class="btn btn-wa" id="btn-whatsapp" onclick="openWhatsApp()" style="margin-top:10px;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    Confirmar pelo WhatsApp
+  </button>
+  <div class="reminder-notice" id="reminder-notice" style="display:none;">📲 Você receberá um lembrete no WhatsApp antes do seu horário.</div>
+  <div class="cancel-section">
+    <p style="font-size:12px;color:var(--mid);margin-bottom:9px;">Precisa cancelar? Anote seu código:</p>
+    <div class="cancel-code-box">
+      <div class="cancel-code" id="cancel-code-display">—</div>
+      <div class="cancel-code-label">Código de cancelamento</div>
+    </div>
+    <p style="font-size:11px;color:#444;">Guarde este código para cancelar pelo site.</p>
+  </div>
+  <hr class="divider">
+  <button class="btn btn-secondary" onclick="showScreen('screen-landing')" style="margin-top:4px;">Voltar ao início</button>
+</div>
+
+<!-- CANCEL -->
+<div id="screen-cancel" class="screen">
+  <button class="back-btn" onclick="showScreen('screen-landing')">← Voltar</button>
+  <h2>Cancelar Agendamento</h2>
+  <p class="subtitle">Digite o código recebido na confirmação</p>
+  <div class="cancel-box">
+    <div class="booking-form">
+      <div class="field"><label>Código de cancelamento</label><input type="text" id="cancel-code-input" placeholder="Ex: A4B7" maxlength="6" style="text-transform:uppercase;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;text-align:center;"></div>
+      <button class="btn btn-danger" onclick="processCancellation()">Cancelar Meu Agendamento</button>
+    </div>
+  </div>
+  <div id="cancel-result" style="margin-top:12px;"></div>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div id="screen-login" class="screen">
+  <div class="login-box">
+    <h2>Painel Admin</h2>
+    <p class="subtitle">Acesso restrito ao proprietário</p>
+    <div class="booking-form">
+      <div class="field"><label>Senha</label><input type="password" id="admin-password" placeholder="Digite sua senha" onkeydown="if(event.key==='Enter')adminLogin()"></div>
+      <button class="btn btn-primary" onclick="adminLogin()">Entrar</button>
+      <button class="btn btn-secondary" onclick="showScreen('screen-landing')" style="margin-top:4px;">Voltar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="screen-admin" class="screen">
+  <div class="admin-header">
+    <h2>Painel</h2>
+    <button class="logout-btn" onclick="adminLogout()">Sair</button>
+  </div>
+  <div class="admin-nav">
+    <button class="admin-nav-btn active" onclick="switchAdminTab('agenda',this)">📋 Agenda</button>
+    <button class="admin-nav-btn" onclick="switchAdminTab('lock',this)">🔒 Bloqueio</button>
+    <button class="admin-nav-btn" onclick="switchAdminTab('reminder',this)">📲 WA</button>
+    <button class="admin-nav-btn" onclick="switchAdminTab('settings',this)">⚙️ Config</button>
+    <button class="admin-nav-btn" onclick="switchAdminTab('security',this)">🔑 Senha</button>
+  </div>
+
+  <div id="admin-tab-agenda">
+    <div class="day-tabs" id="admin-day-tabs"></div>
+    <div id="admin-appointments"></div>
+  </div>
+  <div id="admin-tab-lock" style="display:none;"><div id="lock-box-container"></div></div>
+  <div id="admin-tab-reminder" style="display:none;">
+    <div class="settings-section">
+      <h3>📲 Lembretes via WhatsApp</h3>
+      <p style="font-size:12px;color:var(--mid);margin-bottom:13px;line-height:1.5;">Configure quando os clientes recebem lembretes automáticos.</p>
+      <div class="reminder-item">
+        <div><strong style="font-size:13px;">Lembrete 1h antes</strong><br><span>Link de confirmação 1 hora antes</span></div>
+        <label class="toggle-switch"><input type="checkbox" id="rem-1h" checked><span class="slider"></span></label>
+      </div>
+      <div class="reminder-item">
+        <div><strong style="font-size:13px;">Lembrete no dia de manhã</strong><br><span>Às 8h do dia do agendamento</span></div>
+        <label class="toggle-switch"><input type="checkbox" id="rem-morning"><span class="slider"></span></label>
+      </div>
+    </div>
+    <div class="settings-section">
+      <h3>Número do WhatsApp</h3>
+      <div class="field"><label>Número (com DDD, só números)</label><input type="tel" id="wa-number" placeholder="11999999999" maxlength="15"></div>
+      <div style="margin-top:10px;"></div>
+      <button class="btn btn-primary" onclick="saveReminderSettings()" style="font-size:15px;padding:11px;">Salvar</button>
+    </div>
+    <div style="background:var(--smoke);border-radius:10px;padding:13px;font-size:12px;color:var(--mid);line-height:1.6;">
+      💡 Após o cliente agendar, um botão abre o WhatsApp com a mensagem pronta. Em cada card da agenda, você pode enviar um lembrete manualmente com um clique.
+    </div>
+  </div>
+
+  <div id="admin-tab-settings" style="display:none;">
+    <div class="settings-section">
+      <h3 id="settings-biz-icon">🏪 Seu Negócio</h3>
+      <div class="booking-form">
+        <div class="field">
+          <label>Tipo de negócio</label>
+          <select id="biz-type-select"></select>
+        </div>
+        <div class="field"><label>Nome do negócio</label><input type="text" id="shop-name" placeholder="Ex: Studio da Ana" maxlength="50"></div>
+        <div class="field"><label>Seu nome (profissional)</label><input type="text" id="barber-name" placeholder="Ex: Ana Lima" maxlength="40"></div>
+        <div class="field"><label>Endereço (opcional)</label><input type="text" id="shop-address" placeholder="Ex: Rua das Flores, 123" maxlength="80"></div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <h3>📅 Dias de Trabalho</h3>
+      <div class="week-days-grid" id="work-days-grid"></div>
+      <p style="font-size:11px;color:var(--mid);margin-top:5px;">Toque para ativar/desativar</p>
+    </div>
+    <div class="settings-section">
+      <h3>🕐 Horário e Intervalos</h3>
+      <div class="time-row">
+        <div class="field"><label>Início</label><input type="time" id="work-start"></div>
+        <div class="field"><label>Fim</label><input type="time" id="work-end"></div>
+      </div>
+      <div class="interval-row">
+        <div class="field">
+          <label>Duração do atendimento</label>
+          <select id="slot-interval">
+            <option value="15">15 minutos</option>
+            <option value="30">30 minutos</option>
+            <option value="45">45 minutos</option>
+            <option value="60">60 minutos</option>
+            <option value="90">90 minutos</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Pausa almoço</label>
+          <select id="lunch-break">
+            <option value="none">Sem pausa</option>
+            <option value="12:00-13:00">12h – 13h</option>
+            <option value="12:00-14:00">12h – 14h</option>
+            <option value="13:00-14:00">13h – 14h</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <h3>🚫 Folgas e Feriados</h3>
+      <div class="off-dates-list" id="off-dates-list"></div>
+      <div class="add-off-row">
+        <input type="date" id="new-off-date">
+        <button class="btn-sm" style="background:var(--orange);color:#fff;" onclick="addOffDate()">+ Adicionar</button>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="saveSettings()">Salvar Configurações</button>
+    <div style="height:16px;"></div>
+  </div>
+
+  <!-- SECURITY TAB -->
+  <div id="admin-tab-security" style="display:none;">
+    <div class="pw-section">
+      <h3>🔑 Alterar Senha</h3>
+      <p>Escolha uma senha segura que só você conheça. Mínimo de 4 caracteres.</p>
+      <div class="booking-form">
+        <div class="field"><label>Senha atual</label><input type="password" id="pw-current" placeholder="Digite sua senha atual" maxlength="30"></div>
+        <div class="field">
+          <label>Nova senha</label>
+          <input type="password" id="pw-new" placeholder="Nova senha (mín. 4 caracteres)" maxlength="30" oninput="checkPwStrength('pw-new','pw-bar2')">
+          <div class="pw-strength"><div class="pw-strength-bar" id="pw-bar2"></div></div>
+        </div>
+        <div class="field"><label>Confirmar nova senha</label><input type="password" id="pw-confirm" placeholder="Repita a nova senha" maxlength="30"></div>
+        <button class="btn btn-primary" onclick="changePassword()" style="font-size:16px;padding:12px;">Alterar Senha</button>
+      </div>
+    </div>
+    <div style="background:var(--smoke);border-radius:10px;padding:14px;font-size:12px;color:var(--mid);line-height:1.6;">
+      🔒 Sua senha é armazenada localmente neste dispositivo. Nunca compartilhe com ninguém além de você.
+    </div>
+  </div>
+</div>
+
+</div><!-- /main-app -->
+
 <script>
-// FAQ
-function faq(btn){
-  const a=btn.nextElementSibling,open=a.classList.contains('open');
-  document.querySelectorAll('.faq-a').forEach(x=>x.classList.remove('open'));
-  document.querySelectorAll('.faq-q').forEach(x=>x.classList.remove('open'));
-  if(!open){a.classList.add('open');btn.classList.add('open');}
-}
-
-// Scroll reveal
-const io=new IntersectionObserver(es=>{
-  es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('on');});
-},{threshold:.08});
-document.querySelectorAll('.sr').forEach(el=>io.observe(el));
-
-// DEMO PHONE ANIMATION
-const screens = ['ds1','ds2','ds3','ds4','ds5'];
-const labels  = [
-  'Tela inicial — o que seu cliente vê',
-  'Escolhendo o dia disponível',
-  'Selecionando o horário',
-  'Preenchendo os dados',
-  '✅ Agendamento confirmado!'
+// ═══════════════════════════════════════════════════════
+//  BUSINESS TYPES
+// ═══════════════════════════════════════════════════════
+const BUSINESS_TYPES = [
+  {id:'barbearia',   label:'Barbearia',       icon:'💈', color:'#c8440a', service:'corte'},
+  {id:'salao',       label:'Salão de Beleza',  icon:'💇', color:'#b0308a', service:'serviço'},
+  {id:'clinica',     label:'Clínica / Saúde',  icon:'🏥', color:'#2d7a4f', service:'consulta'},
+  {id:'tatuagem',    label:'Estúdio de Tattoo',icon:'🎨', color:'#4a30c8', service:'sessão'},
+  {id:'manicure',    label:'Manicure / Nail',  icon:'💅', color:'#c83070', service:'atendimento'},
+  {id:'personal',    label:'Personal Trainer', icon:'💪', color:'#c87010', service:'treino'},
+  {id:'estetica',    label:'Estética',         icon:'✨', color:'#708030', service:'procedimento'},
+  {id:'outro',       label:'Outro negócio',    icon:'🏪', color:'#555',    service:'atendimento'},
 ];
-let currentScreen = 0;
-let demoTimer;
 
-function goToScreen(idx){
-  document.getElementById(screens[currentScreen]).classList.remove('active');
-  document.querySelectorAll('.demo-dot')[currentScreen].classList.remove('active');
-  currentScreen = idx;
-  document.getElementById(screens[currentScreen]).classList.add('active');
-  document.querySelectorAll('.demo-dot')[currentScreen].classList.add('active');
-  document.getElementById('demo-label').textContent = labels[currentScreen];
-  clearInterval(demoTimer);
-  demoTimer = setInterval(advanceScreen, 2800);
+// ═══════════════════════════════════════════════════════
+//  STORAGE
+// ═══════════════════════════════════════════════════════
+const DEFAULT_SETTINGS = {
+  shopName:'Meu Negócio', barberName:'Profissional', shopAddress:'',
+  bizType:'barbearia', workDays:[1,2,3,4,5,6],
+  startTime:'08:00', endTime:'18:00', intervalMin:30,
+  lunchBreak:'none', offDates:[], locked:false, lockedSince:null,
+  waNumber:'', rem1h:true, remMorning:false
+};
+const NO_SHOW_TIMEOUT = 10 * 60 * 1000;
+
+function loadDB(){try{return JSON.parse(localStorage.getItem('af_db')||'{"appointments":{}}');}catch{return{appointments:{}};}}
+function saveDB(db){localStorage.setItem('af_db',JSON.stringify(db));}
+function loadSettings(){try{const s=JSON.parse(localStorage.getItem('af_cfg')||'null');return s?{...DEFAULT_SETTINGS,...s}:{...DEFAULT_SETTINGS};}catch{return{...DEFAULT_SETTINGS};}}
+function persistSettings(s){localStorage.setItem('af_cfg',JSON.stringify(s));}
+function getAdminPw(){return localStorage.getItem('af_pw')||'';}
+function setAdminPw(pw){localStorage.setItem('af_pw',pw);}
+function isSetupDone(){return !!localStorage.getItem('af_pw');}
+
+// ═══════════════════════════════════════════════════════
+//  SETUP WIZARD
+// ═══════════════════════════════════════════════════════
+let wizardBizType = BUSINESS_TYPES[0];
+
+function initWizard(){
+  const grid = document.getElementById('btype-grid');
+  BUSINESS_TYPES.forEach(bt => {
+    const el = document.createElement('div');
+    el.className = 'btype' + (bt.id === wizardBizType.id ? ' selected' : '');
+    el.innerHTML = `<span class="btype-icon">${bt.icon}</span>${bt.label}`;
+    el.onclick = () => {
+      document.querySelectorAll('.btype').forEach(b=>b.classList.remove('selected'));
+      el.classList.add('selected'); wizardBizType = bt;
+    };
+    grid.appendChild(el);
+  });
 }
 
-function advanceScreen(){
-  goToScreen((currentScreen + 1) % screens.length);
+function wizardNext(step){
+  if(step === 1){
+    document.getElementById('wizard-step-1').style.display='none';
+    document.getElementById('wizard-step-2').style.display='block';
+    document.getElementById('wizard-btype-icon').textContent=wizardBizType.icon;
+  } else if(step === 2){
+    const name = document.getElementById('wiz-shop-name').value.trim();
+    if(!name){showToastRaw('Digite o nome do negócio',true);return;}
+    document.getElementById('wizard-step-2').style.display='none';
+    document.getElementById('wizard-step-3').style.display='block';
+  }
 }
 
-demoTimer = setInterval(advanceScreen, 2800);
+function wizardBack(step){
+  if(step === 1){
+    document.getElementById('wizard-step-2').style.display='none';
+    document.getElementById('wizard-step-1').style.display='block';
+  } else if(step === 2){
+    document.getElementById('wizard-step-3').style.display='none';
+    document.getElementById('wizard-step-2').style.display='block';
+  }
+}
 
-// Sticky bar
-const sticky=document.getElementById('sticky');
-window.addEventListener('scroll',()=>{
-  sticky.style.display=window.scrollY>700?'flex':'none';
-});
+function wizardFinish(){
+  const pw1 = document.getElementById('wiz-pw1').value;
+  const pw2 = document.getElementById('wiz-pw2').value;
+  if(pw1.length < 4){showToastRaw('Senha deve ter ao menos 4 caracteres',true);return;}
+  if(pw1 !== pw2){showToastRaw('As senhas não conferem',true);return;}
+
+  const settings = loadSettings();
+  settings.shopName = document.getElementById('wiz-shop-name').value.trim() || 'Meu Negócio';
+  settings.barberName = document.getElementById('wiz-barber-name').value.trim() || 'Profissional';
+  settings.waNumber = document.getElementById('wiz-wa-number').value.replace(/\D/g,'');
+  settings.bizType = wizardBizType.id;
+  persistSettings(settings);
+  setAdminPw(pw1);
+
+  document.getElementById('setup-wizard').style.display='none';
+  document.getElementById('main-app').style.display='block';
+  bootApp();
+}
+
+function checkPwStrength(inputId, barId){
+  const pw = document.getElementById(inputId).value;
+  const bar = document.getElementById(barId);
+  let score = 0;
+  if(pw.length >= 4) score++;
+  if(pw.length >= 8) score++;
+  if(/[0-9]/.test(pw)) score++;
+  if(/[A-Z]/.test(pw)||/[!@#$%]/.test(pw)) score++;
+  const colors = ['#b03030','#c87010','#d4a843','#2d7a4f'];
+  const widths = ['25%','50%','75%','100%'];
+  bar.style.width = score ? widths[score-1] : '0';
+  bar.style.background = score ? colors[score-1] : '#3a3a3a';
+}
+
+// ═══════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════
+const DAYS_PT=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+const MONTHS_PT=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+function getBizType(id){ return BUSINESS_TYPES.find(b=>b.id===id)||BUSINESS_TYPES[0]; }
+
+function generateSlots(settings){
+  const slots=[];
+  const[sh,sm]=settings.startTime.split(':').map(Number);
+  const[eh,em]=settings.endTime.split(':').map(Number);
+  const iv=parseInt(settings.intervalMin);
+  let cur=sh*60+sm,end=eh*60+em,ls=null,le=null;
+  if(settings.lunchBreak!=='none'){
+    const[a,b]=settings.lunchBreak.split('-');
+    const[lsh,lsm]=a.split(':').map(Number);const[leh,lem]=b.split(':').map(Number);
+    ls=lsh*60+lsm;le=leh*60+lem;
+  }
+  while(cur<end){
+    if(ls!==null&&cur>=ls&&cur<le){cur+=iv;continue;}
+    slots.push(`${String(Math.floor(cur/60)).padStart(2,'0')}:${String(cur%60).padStart(2,'0')}`);
+    cur+=iv;
+  }
+  return slots;
+}
+
+function getWeekDays(){
+  const settings=loadSettings(),days=[],now=new Date();
+  let i=0;
+  while(days.length<6&&i<30){
+    const d=new Date(now);d.setDate(now.getDate()+i);
+    const dow=d.getDay(),key=d.toISOString().slice(0,10);
+    if(settings.workDays.includes(dow))
+      days.push({date:d,key,name:DAYS_PT[dow],label:`${d.getDate()} ${MONTHS_PT[d.getMonth()]}`});
+    i++;
+  }
+  return days;
+}
+
+function slotDateTime(dayKey,time){
+  const[h,m]=time.split(':').map(Number);
+  const d=new Date(dayKey+'T00:00:00');d.setHours(h,m,0,0);return d;
+}
+
+function isShopOpen(){
+  const settings=loadSettings();
+  const now=new Date(),dow=now.getDay();
+  if(!settings.workDays.includes(dow)) return false;
+  if(settings.offDates.includes(now.toISOString().slice(0,10))) return false;
+  if(settings.locked) return false;
+  const[sh,sm]=settings.startTime.split(':').map(Number);
+  const[eh,em]=settings.endTime.split(':').map(Number);
+  const mins=now.getHours()*60+now.getMinutes();
+  return mins>=sh*60+sm&&mins<eh*60+em;
+}
+
+function getFreeSlots(dayKey){
+  const db=loadDB(),settings=loadSettings();
+  const shopSlots=generateSlots(settings);
+  const dayAppts=db.appointments[dayKey]||{};
+  const now=new Date(),todayKey=now.toISOString().slice(0,10);
+  if(settings.offDates.includes(dayKey)) return[];
+  if(settings.locked&&dayKey===todayKey) return[];
+  return shopSlots.filter(time=>{
+    if(dayAppts[time]){
+      if(dayAppts[time].cancelled) return true;
+      return !!dayAppts[time].freed;
+    }
+    if(dayKey===todayKey){if(slotDateTime(dayKey,time)<now) return false;}
+    return true;
+  });
+}
+
+function isJustFreed(dayKey,time){
+  const db=loadDB(),appt=db.appointments[dayKey]?.[time];
+  if(!appt) return false;
+  if(appt.freed) return(Date.now()-appt.freedAt)<5*60*1000;
+  if(appt.cancelled) return(Date.now()-appt.cancelledAt)<5*60*1000;
+  return false;
+}
+
+function genCode(){return Math.random().toString(36).slice(2,6).toUpperCase();}
+
+// ═══════════════════════════════════════════════════════
+//  SCREEN MANAGEMENT
+// ═══════════════════════════════════════════════════════
+let currentDay=null,selectedSlot=null,lastBooking=null;
+
+function showScreen(id){
+  document.querySelectorAll('#main-app .screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ═══════════════════════════════════════════════════════
+//  LANDING PAGE
+// ═══════════════════════════════════════════════════════
+function renderLanding(){
+  const settings=loadSettings();
+  const biz=getBizType(settings.bizType);
+  document.getElementById('header-shop-name').textContent=settings.shopName;
+  document.getElementById('header-biz-type').textContent=biz.label;
+  document.getElementById('hero-shop-name').textContent=settings.shopName;
+  document.getElementById('hero-barber-name').textContent=settings.barberName;
+  document.getElementById('hero-biz-label').textContent=biz.label;
+  document.getElementById('hero-address').textContent=settings.shopAddress||'';
+  document.getElementById('hero-address').style.display=settings.shopAddress?'block':'none';
+  document.title=settings.shopName+' • Agendio';
+  // accent color per biz type
+  document.documentElement.style.setProperty('--accent', biz.color);
+  document.querySelector('.landing-hero::before');
+  // open badge
+  const badge=document.getElementById('open-status-badge');
+  badge.innerHTML=isShopOpen()
+    ?`<div class="open-badge"><div class="open-dot"></div>Aberto agora</div>`
+    :`<div class="closed-badge">🔴 Fechado no momento</div>`;
+  // hours strip
+  const strip=document.getElementById('hours-strip');
+  strip.innerHTML=getWeekDays().slice(0,3).map(day=>{
+    const free=getFreeSlots(day.key);
+    return`<div class="hour-block"><div class="hday">${day.name.slice(0,3)}</div>${free.length} livres</div>`;
+  }).join('');
+  renderHotSlots();
+}
+
+function renderHotSlots(){
+  const section=document.getElementById('hot-slots-section');
+  const db=loadDB();
+  const todayKey=new Date().toISOString().slice(0,10);
+  const now=new Date();
+  const hot=[];
+  Object.keys(db.appointments[todayKey]||{}).forEach(time=>{
+    const appt=db.appointments[todayKey][time];
+    if(!appt) return;
+    const isHot=(appt.freed&&(Date.now()-appt.freedAt)<10*60*1000)||(appt.cancelled&&(Date.now()-appt.cancelledAt)<10*60*1000);
+    if(isHot&&slotDateTime(todayKey,time)>now) hot.push(time);
+  });
+  if(!hot.length){section.style.display='none';return;}
+  section.style.display='block';
+  section.innerHTML=`<div class="hot-slots"><div class="hot-slots-title">🔥 Horários disponíveis agora — Hoje</div>${hot.map(t=>`<div class="hot-slot-item"><div><span class="hot-slot-time">${t}</span> <span class="hot-slot-label">⚡ Acabou de abrir</span></div><button class="book-now-btn" onclick="quickBook('${todayKey}','${t}')">Agendar agora</button></div>`).join('')}</div>`;
+}
+
+function quickBook(dayKey,time){
+  const day=getWeekDays().find(d=>d.key===dayKey);if(!day) return;
+  currentDay=day;selectedSlot=time;
+  document.getElementById('booking-summary').innerHTML=`<strong>📅 Dia:</strong> ${day.name}, ${day.label}<br><strong>🕐 Horário:</strong> ${time}`;
+  document.getElementById('client-name').value='';document.getElementById('client-phone').value='';
+  showScreen('screen-form');
+}
+
+// ═══════════════════════════════════════════════════════
+//  DAYS & SLOTS
+// ═══════════════════════════════════════════════════════
+function renderDays(){
+  const grid=document.getElementById('days-grid');
+  const days=getWeekDays(),settings=loadSettings();
+  const todayKey=new Date().toISOString().slice(0,10);
+  const banner=document.getElementById('lock-banner');
+  settings.locked?banner.classList.add('visible'):banner.classList.remove('visible');
+  grid.innerHTML='';
+  if(!days.length){grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;color:var(--mid);padding:26px 0;">Configure os dias de trabalho no painel admin</div>`;return;}
+  days.forEach(day=>{
+    const isOff=settings.offDates.includes(day.key);
+    const isLocked=settings.locked&&day.key===todayKey;
+    const free=(!isOff&&!isLocked)?getFreeSlots(day.key):[];
+    const hasAny=free.length>0;
+    const justFreed=free.some(t=>isJustFreed(day.key,t));
+    const card=document.createElement('div');
+    let cls='day-card'+(isOff?' day-off':isLocked?' locked-day':!hasAny?' no-slots':justFreed?' has-available':'');
+    card.className=cls;
+    let status=isOff?'Folga':isLocked?'🔒 Fechado hoje':!hasAny?'Sem horários':`<span>${free.length}</span> horários livres`;
+    card.innerHTML=`<div class="day-name">${day.name}</div><div class="day-date">${day.label}</div><div class="slot-count">${status}</div>`;
+    if(hasAny)card.onclick=()=>openDay(day);
+    grid.appendChild(card);
+  });
+}
+
+function openDay(day){
+  currentDay=day;selectedSlot=null;
+  document.getElementById('slots-day-title').textContent=day.name;
+  document.getElementById('slots-day-date').textContent=day.label;
+  renderSlots();showScreen('screen-slots');
+}
+
+function renderSlots(){
+  const grid=document.getElementById('slots-grid');
+  const free=getFreeSlots(currentDay.key);
+  grid.innerHTML='';
+  if(!free.length){grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;color:var(--mid);padding:16px 0;">Sem horários disponíveis</div>`;}
+  free.forEach(time=>{
+    const freed=isJustFreed(currentDay.key,time);
+    const btn=document.createElement('button');
+    btn.className='slot-btn'+(freed?' just-freed':'');
+    btn.textContent=time;btn.onclick=()=>selectSlot(time,btn);
+    grid.appendChild(btn);
+  });
+  document.getElementById('btn-continue-slots').disabled=true;
+}
+
+function selectSlot(time,btn){
+  selectedSlot=time;
+  document.querySelectorAll('.slot-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');document.getElementById('btn-continue-slots').disabled=false;
+}
+
+function showFormScreen(){
+  document.getElementById('booking-summary').innerHTML=`<strong>📅 Dia:</strong> ${currentDay.name}, ${currentDay.label}<br><strong>🕐 Horário:</strong> ${selectedSlot}`;
+  document.getElementById('client-name').value='';document.getElementById('client-phone').value='';
+  showScreen('screen-form');
+}
+
+// ═══════════════════════════════════════════════════════
+//  CONFIRM BOOKING
+// ═══════════════════════════════════════════════════════
+function confirmBooking(){
+  const name=document.getElementById('client-name').value.trim();
+  const phone=document.getElementById('client-phone').value.trim();
+  if(!name){showToast('Digite seu nome',true);return;}
+  if(!phone){showToast('Digite seu telefone',true);return;}
+  const db=loadDB();
+  if(!db.appointments[currentDay.key]) db.appointments[currentDay.key]={};
+  const existing=db.appointments[currentDay.key][selectedSlot];
+  if(existing&&!existing.freed&&!existing.cancelled){showToast('Horário ocupado 😬',true);showScreen('screen-slots');renderSlots();return;}
+  const code=genCode();
+  db.appointments[currentDay.key][selectedSlot]={name,phone,bookedAt:Date.now(),arrived:false,freed:false,freedAt:null,countdownStart:null,cancelled:false,cancelledAt:null,code};
+  saveDB(db);
+  lastBooking={name,phone,day:currentDay,slot:selectedSlot,code};
+  const settings=loadSettings();
+  const biz=getBizType(settings.bizType);
+  document.getElementById('success-details').innerHTML=`
+    <div class="row"><span>Cliente</span><span>${name}</span></div>
+    <div class="row"><span>Telefone</span><span>${phone}</span></div>
+    <div class="row"><span>Dia</span><span>${currentDay.name}, ${currentDay.label}</span></div>
+    <div class="row"><span>Horário</span><span>${selectedSlot}</span></div>
+    <div class="row"><span>${biz.label}</span><span>${settings.shopName}</span></div>`;
+  document.getElementById('cancel-code-display').textContent=code;
+  const notice=document.getElementById('reminder-notice');
+  notice.style.display=(settings.rem1h&&settings.waNumber)?'block':'none';
+  showScreen('screen-success');
+  showToast('Agendamento confirmado! ✅');
+}
+
+// ═══════════════════════════════════════════════════════
+//  WHATSAPP
+// ═══════════════════════════════════════════════════════
+function openWhatsApp(){
+  if(!lastBooking) return;
+  const settings=loadSettings();
+  const biz=getBizType(settings.bizType);
+  const{name,day,slot,code}=lastBooking;
+  const msg=`Olá! Acabei de agendar um(a) *${biz.service}* em *${settings.shopName}*.\n\n${biz.icon} *${day.name}, ${day.label} às ${slot}*\nNome: ${name}\nCódigo: ${code}\n\nAguardo confirmação!`;
+  const waNum=settings.waNumber||'';
+  const url=waNum?`https://wa.me/55${waNum}?text=${encodeURIComponent(msg)}`:`https://wa.me/?text=${encodeURIComponent(msg)}`;
+  window.open(url,'_blank');
+}
+
+// ═══════════════════════════════════════════════════════
+//  CANCELLATION
+// ═══════════════════════════════════════════════════════
+function showCancelScreen(){
+  document.getElementById('cancel-code-input').value='';
+  document.getElementById('cancel-result').innerHTML='';
+  showScreen('screen-cancel');
+}
+
+function processCancellation(){
+  const inputCode=document.getElementById('cancel-code-input').value.trim().toUpperCase();
+  if(!inputCode||inputCode.length<4){showToast('Digite o código completo',true);return;}
+  const db=loadDB();let found=false;
+  Object.keys(db.appointments).forEach(dayKey=>{
+    Object.keys(db.appointments[dayKey]).forEach(time=>{
+      const appt=db.appointments[dayKey][time];
+      if(!appt||appt.cancelled||appt.arrived) return;
+      if(appt.code===inputCode){
+        found=true;
+        const diff=slotDateTime(dayKey,time).getTime()-Date.now();
+        if(diff<30*60*1000&&diff>0){
+          document.getElementById('cancel-result').innerHTML=`<div style="background:#2a1010;border:1px solid var(--red);border-radius:8px;padding:13px;font-size:13px;color:#e08080;">⚠️ Cancelamento não permitido — faltam menos de 30 minutos.</div>`;
+          return;
+        }
+        db.appointments[dayKey][time].cancelled=true;db.appointments[dayKey][time].cancelledAt=Date.now();
+        saveDB(db);
+        const[y,m,d]=dayKey.split('-');
+        document.getElementById('cancel-result').innerHTML=`<div style="background:#0d2a1a;border:1px solid var(--green);border-radius:8px;padding:13px;font-size:13px;color:#80e0a0;">✅ Cancelado com sucesso! Horário <strong>${time}</strong> de ${d}/${m} foi liberado.</div>`;
+        renderDays();renderLanding();showToast('Horário cancelado e liberado');
+      }
+    });
+  });
+  if(!found) document.getElementById('cancel-result').innerHTML=`<div style="background:#2a1010;border:1px solid var(--red);border-radius:8px;padding:13px;font-size:13px;color:#e08080;">❌ Código não encontrado.</div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  ADMIN AUTH
+// ═══════════════════════════════════════════════════════
+function goToLogin(){if(sessionStorage.getItem('af_ok'))showAdminPanel();else showScreen('screen-login');}
+function adminLogin(){
+  const pw=document.getElementById('admin-password').value;
+  if(pw===getAdminPw()){sessionStorage.setItem('af_ok','1');showAdminPanel();}
+  else showToast('Senha incorreta',true);
+}
+function adminLogout(){sessionStorage.removeItem('af_ok');showScreen('screen-landing');}
+
+// ═══════════════════════════════════════════════════════
+//  CHANGE PASSWORD
+// ═══════════════════════════════════════════════════════
+function changePassword(){
+  const cur=document.getElementById('pw-current').value;
+  const nw=document.getElementById('pw-new').value;
+  const conf=document.getElementById('pw-confirm').value;
+  if(cur!==getAdminPw()){showToast('Senha atual incorreta',true);return;}
+  if(nw.length<4){showToast('Nova senha muito curta (mín. 4)',true);return;}
+  if(nw!==conf){showToast('As senhas não conferem',true);return;}
+  setAdminPw(nw);
+  document.getElementById('pw-current').value='';
+  document.getElementById('pw-new').value='';
+  document.getElementById('pw-confirm').value='';
+  document.getElementById('pw-bar2').style.width='0';
+  showToast('✅ Senha alterada com sucesso!');
+}
+
+// ═══════════════════════════════════════════════════════
+//  ADMIN PANEL
+// ═══════════════════════════════════════════════════════
+let adminDaySelected=null,currentAdminTab='agenda';
+
+function showAdminPanel(){
+  const days=getWeekDays();
+  if(!adminDaySelected&&days.length) adminDaySelected=days[0].key;
+  switchAdminTab(currentAdminTab);showScreen('screen-admin');
+}
+
+function switchAdminTab(tab,btnEl){
+  currentAdminTab=tab;
+  document.querySelectorAll('.admin-nav-btn').forEach(b=>b.classList.remove('active'));
+  if(btnEl)btnEl.classList.add('active');
+  else{const idx=['agenda','lock','reminder','settings','security'].indexOf(tab);const btns=document.querySelectorAll('.admin-nav-btn');if(btns[idx])btns[idx].classList.add('active');}
+  ['agenda','lock','reminder','settings','security'].forEach(t=>{document.getElementById('admin-tab-'+t).style.display=t===tab?'block':'none';});
+  if(tab==='agenda')renderAgendaTab();
+  if(tab==='lock')renderLockTab();
+  if(tab==='reminder')renderReminderTab();
+  if(tab==='settings')renderSettingsTab();
+}
+
+function renderAgendaTab(){
+  const days=getWeekDays(),settings=loadSettings();
+  const tabs=document.getElementById('admin-day-tabs');
+  tabs.innerHTML='';
+  days.forEach(day=>{
+    const t=document.createElement('div');
+    const isOff=settings.offDates.includes(day.key);
+    t.className='day-tab'+(day.key===adminDaySelected?' active':'')+(isOff?' is-off':'');
+    t.textContent=day.name.slice(0,3)+' '+day.date.getDate();
+    t.onclick=()=>{adminDaySelected=day.key;renderAgendaTab();};
+    tabs.appendChild(t);
+  });
+  renderAdminAppointments();
+}
+
+function renderAdminAppointments(){
+  const db=loadDB(),settings=loadSettings();
+  const shopSlots=generateSlots(settings);
+  const appts=db.appointments[adminDaySelected]||{};
+  const container=document.getElementById('admin-appointments');container.innerHTML='';
+  if(settings.offDates.includes(adminDaySelected)){container.innerHTML=`<div class="empty-state"><div class="icon">🚫</div>Dia de folga</div>`;return;}
+  const booked=shopSlots.filter(t=>appts[t]&&!appts[t].freed);
+  if(!booked.length){container.innerHTML=`<div class="empty-state"><div class="icon">📋</div>Nenhum agendamento neste dia</div>`;return;}
+  booked.forEach(time=>{
+    const appt=appts[time];
+    const card=document.createElement('div');
+    card.className='appointment-card'+(appt.arrived?' arrived':appt.cancelled?' cancelled-card':'');
+    let actionHtml='';
+    if(appt.cancelled)actionHtml=`<span class="cancelled-badge">✗ Cancelado</span>`;
+    else if(appt.arrived)actionHtml=`<span class="arrived-badge">✓ Chegou</span>`;
+    else{
+      const cdInfo=getCountdownInfo(appt);
+      const cdHtml=cdInfo.active?`<span class="countdown-badge" id="cd-${adminDaySelected}-${time.replace(':','')}">⏱ ${cdInfo.label}</span>`:'';
+      actionHtml=`${cdHtml}<button class="arrived-btn" onclick="markArrived('${adminDaySelected}','${time}')">✓ Chegou</button>`;
+    }
+    const waLink=settings.waNumber?`<a href="https://wa.me/55${settings.waNumber}?text=${encodeURIComponent(`Olá ${appt.name}! Lembrete: seu ${getBizType(settings.bizType).service} em ${settings.shopName} é hoje às ${time}. Te esperamos! ${getBizType(settings.bizType).icon}`)}" target="_blank" style="font-size:11px;color:var(--wa);text-decoration:none;">📲 Lembrete WA</a>`:'';
+    card.innerHTML=`<div class="time-badge">${time}</div><div class="client-name">${appt.name}</div><div class="client-phone">📱 ${appt.phone}</div><div class="card-bottom"><div style="display:flex;flex-direction:column;gap:2px;">${waLink}<span style="font-size:10px;color:var(--mid);">Ag. ${formatRelativeTime(appt.bookedAt)}</span></div><div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;">${actionHtml}</div></div>`;
+    container.appendChild(card);
+  });
+}
+
+function getCountdownInfo(appt){
+  if(!appt.countdownStart) return{active:false};
+  const rem=NO_SHOW_TIMEOUT-(Date.now()-appt.countdownStart);
+  if(rem<=0) return{active:false};
+  return{active:true,label:`${Math.floor(rem/60000)}:${String(Math.floor((rem%60000)/1000)).padStart(2,'0')}`};
+}
+function markArrived(dayKey,time){
+  const db=loadDB();if(!db.appointments[dayKey]?.[time]) return;
+  db.appointments[dayKey][time].arrived=true;db.appointments[dayKey][time].countdownStart=null;
+  saveDB(db);renderAdminAppointments();showToast('✓ Marcado como chegou!');
+}
+function formatRelativeTime(ts){
+  const diff=Date.now()-ts;
+  if(diff<60000) return 'agora';
+  if(diff<3600000) return `há ${Math.floor(diff/60000)}min`;
+  return `há ${Math.floor(diff/3600000)}h`;
+}
+
+function renderLockTab(){
+  const settings=loadSettings();
+  const box=document.getElementById('lock-box-container');
+  if(settings.locked){
+    const since=settings.lockedSince?new Date(settings.lockedSince).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'—';
+    box.innerHTML=`<div class="lock-box"><h3>🔒 Agenda Bloqueada</h3><div class="lock-status"><div class="lock-dot red"></div>Bloqueada desde ${since}</div><p>Nenhum novo agendamento pode ser feito. Agendamentos existentes continuam confirmados.</p><button class="btn btn-green" onclick="toggleLock(false)">✅ Reabrir Agenda</button></div><div style="background:var(--smoke);border-radius:10px;padding:13px;margin-top:9px;font-size:12px;color:var(--mid);line-height:1.5;">💡 O bloqueio não cancela agendamentos existentes — apenas impede novos.</div>`;
+  } else {
+    box.innerHTML=`<div class="lock-box unlocked"><h3>Controle de Disponibilidade</h3><div class="lock-status"><div class="lock-dot"></div>Agenda aberta normalmente</div><p>Use o bloqueio de emergência para pausar novos agendamentos temporariamente.</p><button class="btn btn-danger" onclick="toggleLock(true)">🔒 Fechar Agenda Agora</button></div><div style="background:var(--smoke);border-radius:10px;padding:13px;margin-top:9px;font-size:12px;color:var(--mid);line-height:1.5;">💡 Útil para emergências, saída inesperada ou qualquer imprevisto.</div>`;
+  }
+}
+function toggleLock(lock){
+  const settings=loadSettings();settings.locked=lock;settings.lockedSince=lock?Date.now():null;
+  persistSettings(settings);renderLockTab();renderDays();renderLanding();
+  showToast(lock?'🔒 Agenda fechada':'✅ Agenda reaberta!');
+}
+
+function renderReminderTab(){
+  const settings=loadSettings();
+  document.getElementById('rem-1h').checked=settings.rem1h!==false;
+  document.getElementById('rem-morning').checked=!!settings.remMorning;
+  document.getElementById('wa-number').value=settings.waNumber||'';
+}
+function saveReminderSettings(){
+  const settings=loadSettings();
+  settings.rem1h=document.getElementById('rem-1h').checked;
+  settings.remMorning=document.getElementById('rem-morning').checked;
+  settings.waNumber=document.getElementById('wa-number').value.replace(/\D/g,'');
+  persistSettings(settings);showToast('✅ Configurações salvas!');
+}
+
+function renderSettingsTab(){
+  const settings=loadSettings();
+  const DAY_NAMES=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  // Fill biz type select
+  const sel=document.getElementById('biz-type-select');
+  sel.innerHTML='';
+  BUSINESS_TYPES.forEach(bt=>{
+    const o=document.createElement('option');
+    o.value=bt.id;o.textContent=bt.icon+' '+bt.label;
+    if(bt.id===settings.bizType) o.selected=true;
+    sel.appendChild(o);
+  });
+  document.getElementById('shop-name').value=settings.shopName;
+  document.getElementById('barber-name').value=settings.barberName;
+  document.getElementById('shop-address').value=settings.shopAddress||'';
+  const wdg=document.getElementById('work-days-grid');wdg.innerHTML='';
+  [1,2,3,4,5,6,0].forEach(dow=>{
+    const d=document.createElement('div');
+    d.className='day-toggle'+(settings.workDays.includes(dow)?' on':'');
+    d.textContent=DAY_NAMES[dow];d.dataset.dow=dow;
+    d.onclick=()=>d.classList.toggle('on');wdg.appendChild(d);
+  });
+  document.getElementById('work-start').value=settings.startTime;
+  document.getElementById('work-end').value=settings.endTime;
+  document.getElementById('slot-interval').value=settings.intervalMin;
+  document.getElementById('lunch-break').value=settings.lunchBreak;
+  renderOffDates(settings.offDates);
+}
+
+function renderOffDates(offDates){
+  const list=document.getElementById('off-dates-list');list.innerHTML='';
+  if(!offDates.length){list.innerHTML=`<p style="font-size:12px;color:var(--mid);margin-bottom:7px;">Nenhuma folga cadastrada</p>`;return;}
+  [...offDates].sort().forEach(d=>{
+    const[y,m,day]=d.split('-');
+    const item=document.createElement('div');item.className='off-date-item';
+    item.innerHTML=`<span>🚫 ${day}/${m}/${y}</span><button class="remove-btn" onclick="removeOffDate('${d}')">×</button>`;
+    list.appendChild(item);
+  });
+}
+function addOffDate(){
+  const val=document.getElementById('new-off-date').value;
+  if(!val){showToast('Selecione uma data',true);return;}
+  const settings=loadSettings();
+  if(settings.offDates.includes(val)){showToast('Data já cadastrada',true);return;}
+  settings.offDates.push(val);persistSettings(settings);renderOffDates(settings.offDates);
+  document.getElementById('new-off-date').value='';showToast('Folga adicionada!');
+}
+function removeOffDate(d){
+  const settings=loadSettings();settings.offDates=settings.offDates.filter(x=>x!==d);
+  persistSettings(settings);renderOffDates(settings.offDates);showToast('Removido');
+}
+function saveSettings(){
+  const settings=loadSettings();
+  settings.bizType=document.getElementById('biz-type-select').value;
+  settings.shopName=document.getElementById('shop-name').value.trim()||'Meu Negócio';
+  settings.barberName=document.getElementById('barber-name').value.trim()||'Profissional';
+  settings.shopAddress=document.getElementById('shop-address').value.trim();
+  const toggles=document.querySelectorAll('.day-toggle');settings.workDays=[];
+  toggles.forEach(t=>{if(t.classList.contains('on'))settings.workDays.push(parseInt(t.dataset.dow));});
+  settings.startTime=document.getElementById('work-start').value;
+  settings.endTime=document.getElementById('work-end').value;
+  settings.intervalMin=parseInt(document.getElementById('slot-interval').value);
+  settings.lunchBreak=document.getElementById('lunch-break').value;
+  if(settings.startTime>=settings.endTime){showToast('Horário de início deve ser antes do fim',true);return;}
+  if(!settings.workDays.length){showToast('Selecione ao menos um dia',true);return;}
+  persistSettings(settings);renderDays();renderLanding();
+  showToast('✅ Configurações salvas!');
+}
+
+// ═══════════════════════════════════════════════════════
+//  NO-SHOW TIMER
+// ═══════════════════════════════════════════════════════
+function checkNoShows(){
+  const db=loadDB(),now=Date.now(),todayKey=new Date().toISOString().slice(0,10);
+  let changed=false;
+  Object.keys(db.appointments[todayKey]||{}).forEach(time=>{
+    const appt=db.appointments[todayKey][time];
+    if(!appt||appt.arrived||appt.freed||appt.cancelled) return;
+    const slotMs=slotDateTime(todayKey,time).getTime();
+    if(now>=slotMs&&!appt.countdownStart){db.appointments[todayKey][time].countdownStart=slotMs;changed=true;}
+    if(appt.countdownStart&&(now-appt.countdownStart)>=NO_SHOW_TIMEOUT){
+      db.appointments[todayKey][time].freed=true;db.appointments[todayKey][time].freedAt=now;
+      changed=true;showToast(`⚡ ${time} liberado — cliente não chegou`);
+    }
+  });
+  if(changed){saveDB(db);renderDays();renderLanding();if(document.getElementById('screen-admin').classList.contains('active')&&currentAdminTab==='agenda')renderAdminAppointments();}
+}
+
+function updateCountdowns(){
+  const todayKey=new Date().toISOString().slice(0,10);
+  const db=loadDB();
+  Object.keys(db.appointments[todayKey]||{}).forEach(time=>{
+    const appt=db.appointments[todayKey][time];
+    if(!appt||appt.arrived||appt.freed||appt.cancelled||!appt.countdownStart) return;
+    const el=document.getElementById(`cd-${todayKey}-${time.replace(':','')}`);
+    if(!el) return;
+    const info=getCountdownInfo(appt);if(info.active)el.textContent=`⏱ ${info.label}`;
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════
+let toastTimer;
+function showToast(msg,warn=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className=warn?'warn':'';t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3400);
+}
+function showToastRaw(msg,warn=false){
+  // fallback for wizard (before main-app is visible)
+  alert(msg);
+}
+
+// ═══════════════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════════════
+function bootApp(){
+  renderLanding();renderDays();
+  setInterval(checkNoShows,15000);
+  setInterval(updateCountdowns,1000);
+  setInterval(()=>{renderDays();renderLanding();},60000);
+  checkNoShows();
+}
+
+// Entry point
+if(isSetupDone()){
+  document.getElementById('setup-wizard').style.display='none';
+  document.getElementById('main-app').style.display='block';
+  bootApp();
+} else {
+  document.getElementById('setup-wizard').style.display='flex';
+  document.getElementById('main-app').style.display='none';
+  initWizard();
+}
 </script>
 </body>
 </html>
