@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agendio — Seus clientes agendam sozinhos. Você só atende.</title>
+<meta name="description" content="Pare de perder tempo marcando horários no WhatsApp. O Agendio cria sua agenda online automática em minutos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════
+   AGENDIO — Página de Vendas Kiwify
+   Sem nav · Focada em conversão
+   ══════════════════════════════════════ */
+:root {
+  --bg:    #070707;
+  --bg2:   #0b0b0b;
+  --white: #f5f0e8;
+  --gold:  #d4a843;
+  --rust:  #c8440a;
+  --rust2: #df5512;
+  --green: #1a9a56;
+  --mid:   #555;
+  --smoke: #101010;
+  --border:rgba(255,255,255,.07);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--white);
+  overflow-x:hidden;
+  line-height:1.65;
+}
+
+/* ── NOISE TEXTURE ── */
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:999;
+}
+
+/* ── SCROLL REVEAL ── */
+.sr{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease;}
+.sr.on{opacity:1;transform:none;}
+.sr-d1{transition-delay:.1s;}
+.sr-d2{transition-delay:.2s;}
+.sr-d3{transition-delay:.3s;}
+
+/* ── HELPERS ── */
+.c{max-width:1040px;margin:0 auto;padding:0 22px;}
+.c-sm{max-width:680px;margin:0 auto;padding:0 22px;}
+.divider{height:1px;background:var(--border);margin:0 22px;}
+section{padding:88px 0;}
+.tag{
+  display:inline-block;
+  font-family:'Syne',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--gold);background:rgba(212,168,67,.09);
+  border:1px solid rgba(212,168,67,.22);
+  padding:5px 14px;border-radius:20px;margin-bottom:16px;
+}
+.tag.green{color:var(--green);background:rgba(26,154,86,.09);border-color:rgba(26,154,86,.22);}
+h2.display{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(38px,6.5vw,66px);
+  letter-spacing:2px;line-height:.95;
+  margin-bottom:14px;
+}
+h2.display em{color:var(--gold);font-style:normal;}
+.sec-sub{
+  font-size:16px;color:rgba(245,240,232,.52);
+  line-height:1.75;max-width:540px;
+}
+
+/* ════════════════ HERO ════════════════ */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;padding:72px 22px 60px;
+  position:relative;overflow:hidden;
+}
+.hero-aura{
+  position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 75% 55% at 50% 25%,rgba(200,68,10,.18) 0%,transparent 65%),
+    radial-gradient(ellipse 45% 35% at 15% 75%,rgba(212,168,67,.09) 0%,transparent 55%),
+    radial-gradient(ellipse 40% 35% at 85% 70%,rgba(26,154,86,.07) 0%,transparent 55%);
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:7px;
+  font-family:'Syne',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;color:var(--gold);
+  background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.24);
+  padding:7px 18px;border-radius:30px;margin-bottom:28px;
+  animation:fu .5s ease both;
+}
+.pulse-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pd 1.6s ease-in-out infinite;}
+@keyframes pd{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.3;transform:scale(1.4);}}
+
+.hero h1{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(52px,11vw,112px);
+  letter-spacing:2px;line-height:.9;
+  margin-bottom:10px;
+  animation:fu .5s .1s ease both;
+}
+.hero h1 .gold{color:var(--gold);}
+.hero h1 .rust{color:var(--rust);}
+
+.hero-sub{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(15px,2.6vw,20px);
+  color:rgba(245,240,232,.55);
+  max-width:580px;margin:16px auto 36px;
+  line-height:1.6;
+  animation:fu .5s .2s ease both;
+}
+
+.cta-group{
+  display:flex;flex-direction:column;align-items:center;gap:11px;
+  animation:fu .5s .3s ease both;
+}
+.btn-main{
+  display:inline-flex;align-items:center;gap:9px;
+  background:linear-gradient(135deg,var(--rust),var(--rust2));
+  color:#fff;border:none;padding:18px 42px;border-radius:10px;
+  font-family:'Syne',sans-serif;font-size:17px;font-weight:800;
+  cursor:pointer;text-decoration:none;transition:all .25s;
+  box-shadow:0 16px 40px rgba(200,68,10,.35);letter-spacing:.2px;
+}
+.btn-main:hover{transform:translateY(-3px);box-shadow:0 24px 52px rgba(200,68,10,.45);}
+.trust-row{
+  display:flex;align-items:center;flex-wrap:wrap;justify-content:center;
+  gap:6px 16px;font-size:12px;color:var(--mid);
+}
+.trust-row span{color:var(--green);font-weight:600;}
+
+/* phone mockup */
+.mockup-wrap{
+  margin-top:52px;position:relative;
+  animation:fu .6s .4s ease both;
+}
+.phone{
+  width:224px;margin:0 auto;
+  background:#0c0c0c;border-radius:38px;
+  border:2px solid #1c1c1c;overflow:hidden;
+  box-shadow:0 60px 120px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.04);
+  position:relative;z-index:1;
+  animation:float 4s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.p-notch{height:20px;background:#060606;border-radius:0 0 12px 12px;width:64px;margin:0 auto;}
+.p-body{padding:11px;background:#090909;}
+.p-head{background:#151515;border-radius:8px;padding:8px 10px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;}
+.p-logo{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:var(--gold);}
+.p-status{display:flex;align-items:center;gap:4px;font-size:8px;color:#444;}
+.p-sdot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pd 1.6s ease-in-out infinite;}
+.p-hero{background:linear-gradient(135deg,#180804,#151515);border-radius:9px;padding:13px 10px;margin-bottom:7px;text-align:center;border:1px solid #221008;}
+.p-shop{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--gold);}
+.p-name{font-size:8px;color:#444;margin:2px 0 8px;}
+.p-badge{display:inline-flex;align-items:center;gap:3px;background:#071408;border:1px solid #1a3a20;color:var(--green);padding:3px 8px;border-radius:10px;font-size:7px;font-weight:700;margin-bottom:9px;}
+.p-badge-dot{width:3px;height:3px;border-radius:50%;background:var(--green);}
+.p-btn{background:var(--rust);color:#fff;border-radius:5px;padding:6px;font-size:8px;font-weight:700;text-align:center;font-family:'Syne',sans-serif;}
+.p-label{font-size:8px;color:#3a3a3a;font-weight:700;letter-spacing:1px;margin-bottom:5px;}
+.p-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:7px;}
+.p-day{background:#141414;border-radius:6px;padding:7px 6px;border-left:3px solid var(--rust);}
+.p-day-name{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:var(--gold);}
+.p-day-slots{font-size:7px;color:#333;margin-top:1px;}<br>.p-day-slots b{color:var(--green);}
+.p-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-bottom:7px;}
+.p-slot{background:#141414;border-radius:4px;padding:5px 2px;text-align:center;font-size:8px;font-weight:600;color:#555;}
+.p-slot.sel{border:1px solid var(--gold);color:var(--gold);background:#151000;}
+.p-cta{background:linear-gradient(135deg,var(--rust),var(--rust2));color:#fff;border-radius:5px;padding:7px;font-size:8px;font-weight:700;text-align:center;font-family:'Syne',sans-serif;}
+.mockup-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:300px;height:300px;background:radial-gradient(circle,rgba(200,68,10,.18) 0%,transparent 70%);pointer-events:none;}
+@keyframes fu{from{opacity:0;transform:translateY(22px);}to{opacity:1;transform:none;}}
+
+/* ════════════════ PROBLEMA ════════════════ */
+.prob{background:var(--bg2);}
+.pain-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px;margin-top:44px;}
+.pain-card{
+  background:#0d0d0d;border:1px solid var(--border);border-radius:14px;
+  padding:22px 18px;display:flex;align-items:flex-start;gap:13px;
+  transition:all .3s;
+}
+.pain-card:hover{border-color:rgba(200,68,10,.25);transform:translateY(-2px);}
+.pain-icon{font-size:24px;flex-shrink:0;margin-top:2px;}
+.pain-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:4px;}
+.pain-desc{font-size:13px;color:rgba(245,240,232,.48);line-height:1.6;}
+
+/* ════════════════ SOLUÇÃO ════════════════ */
+.sol-wrap{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;}
+.sol-card{background:linear-gradient(135deg,#0e0a02,#0d0d0d);border:1px solid rgba(212,168,67,.15);border-radius:18px;padding:26px 20px;}
+.sol-row{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.sol-row:last-child{border:none;padding-bottom:0;}
+.sol-check{width:24px;height:24px;border-radius:50%;background:rgba(26,154,86,.14);border:1px solid rgba(26,154,86,.28);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px;}
+.sol-item strong{display:block;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:2px;}
+.sol-item span{font-size:12px;color:rgba(245,240,232,.45);line-height:1.5;}
+
+/* ════════════════ BENEFÍCIOS ════════════════ */
+.ben{background:var(--bg2);}
+.ben-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:48px;}
+.ben-card{
+  background:#0d0d0d;border:1px solid var(--border);border-radius:16px;
+  padding:26px 20px;transition:all .3s;position:relative;overflow:hidden;
+}
+.ben-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity .3s;}
+.ben-card:hover::before{opacity:1;}
+.ben-card:hover{transform:translateY(-4px);border-color:rgba(212,168,67,.15);}
+.ben-icon{font-size:30px;margin-bottom:13px;}
+.ben-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:7px;}
+.ben-desc{font-size:13px;color:rgba(245,240,232,.48);line-height:1.7;}
+
+/* ════════════════ COMO FUNCIONA ════════════════ */
+.steps{display:flex;flex-direction:column;max-width:640px;margin:48px auto 0;}
+.step{display:flex;gap:20px;padding:26px 0;border-bottom:1px solid var(--border);}
+.step:last-child{border:none;}
+.step-num{
+  flex-shrink:0;width:42px;height:42px;border-radius:50%;
+  background:linear-gradient(135deg,var(--rust),var(--rust2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:19px;color:#fff;
+  box-shadow:0 8px 20px rgba(200,68,10,.28);margin-top:2px;
+}
+.step h4{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:5px;}
+.step p{font-size:13px;color:rgba(245,240,232,.48);line-height:1.6;}
+
+/* ════════════════ DEPOIMENTOS ════════════════ */
+.dep{background:var(--bg2);}
+.dep-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:14px;margin-top:46px;}
+.dep-card{background:#0d0d0d;border:1px solid var(--border);border-radius:16px;padding:24px 20px;transition:all .25s;}
+.dep-card:hover{border-color:rgba(212,168,67,.18);transform:translateY(-2px);}
+.dep-stars{color:var(--gold);letter-spacing:2px;font-size:13px;margin-bottom:11px;}
+.dep-text{font-size:14px;color:rgba(245,240,232,.68);line-height:1.75;margin-bottom:16px;font-style:italic;}
+.dep-author{display:flex;align-items:center;gap:10px;}
+.dep-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:16px;color:#fff;flex-shrink:0;}
+.dep-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.dep-job{font-size:11px;color:var(--mid);}
+
+/* ════════════════ VALOR ════════════════ */
+.val-box{
+  background:linear-gradient(135deg,#0f0b02,#0d0d0d);
+  border:1px solid rgba(212,168,67,.18);border-radius:20px;
+  padding:42px 34px;max-width:680px;margin:48px auto 0;text-align:center;
+}
+.val-box h3{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,5vw,46px);letter-spacing:2px;line-height:1;margin-bottom:13px;}
+.val-box h3 em{color:var(--gold);font-style:normal;}
+.val-box p{font-size:15px;color:rgba(245,240,232,.52);line-height:1.75;max-width:500px;margin:0 auto;}
+.val-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:28px;}
+.vstat{background:#090909;border:1px solid var(--border);border-radius:12px;padding:16px 10px;text-align:center;}
+.vstat .n{font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--gold);line-height:1;}
+.vstat .l{font-size:11px;color:var(--mid);margin-top:3px;line-height:1.4;}
+
+/* ════════════════ PREÇO ════════════════ */
+.price{text-align:center;}
+.price-card{
+  background:linear-gradient(145deg,#100d02,#0d0d0d);
+  border:2px solid rgba(212,168,67,.28);border-radius:24px;
+  padding:50px 36px;max-width:430px;margin:50px auto 0;
+  position:relative;overflow:hidden;
+}
+.price-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.price-card::after{content:'';position:absolute;top:-80px;right:-80px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(212,168,67,.1) 0%,transparent 70%);}
+.price-ribbon{
+  display:inline-block;background:linear-gradient(135deg,var(--rust),var(--rust2));
+  color:#fff;padding:6px 18px;border-radius:20px;
+  font-family:'Syne',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;margin-bottom:20px;
+  position:relative;z-index:1;
+}
+.price-name{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:3px;color:var(--gold);margin-bottom:5px;position:relative;z-index:1;}
+.price-desc{font-size:13px;color:var(--mid);margin-bottom:20px;position:relative;z-index:1;}
+.price-old{font-size:13px;color:var(--mid);text-decoration:line-through;margin-bottom:6px;position:relative;z-index:1;}
+.price-val{display:flex;align-items:flex-start;justify-content:center;gap:4px;margin-bottom:6px;position:relative;z-index:1;}
+.price-cur{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--gold);margin-top:10px;}
+.price-big{font-family:'Bebas Neue',sans-serif;font-size:92px;color:var(--white);line-height:1;letter-spacing:-2px;}
+.price-dec{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--white);margin-top:10px;}
+.price-period{font-size:14px;color:var(--mid);margin-bottom:28px;position:relative;z-index:1;}
+.price-list{list-style:none;text-align:left;margin-bottom:32px;display:flex;flex-direction:column;gap:11px;position:relative;z-index:1;}
+.price-list li{display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:1.5;}
+.pcheck{color:var(--green);font-weight:700;flex-shrink:0;margin-top:2px;}
+.btn-buy{
+  display:block;width:100%;padding:19px;
+  background:linear-gradient(135deg,var(--rust),var(--rust2));
+  color:#fff;border:none;border-radius:10px;
+  font-family:'Syne',sans-serif;font-size:18px;font-weight:800;
+  cursor:pointer;text-decoration:none;transition:all .25s;
+  box-shadow:0 14px 36px rgba(200,68,10,.35);text-align:center;
+  position:relative;z-index:1;
+}
+.btn-buy:hover{transform:translateY(-3px);box-shadow:0 20px 48px rgba(200,68,10,.48);}
+.price-guar{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:18px;font-size:12px;color:var(--mid);position:relative;z-index:1;}
+.price-guar b{color:var(--green);}
+
+/* ════════════════ GARANTIA ════════════════ */
+.guar-box{
+  background:#080f09;border:1px solid rgba(26,154,86,.22);border-radius:20px;
+  padding:42px 34px;max-width:580px;margin:0 auto;text-align:center;
+}
+.guar-icon{font-size:54px;margin-bottom:14px;}
+.guar-title{font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:2px;color:var(--green);margin-bottom:10px;}
+.guar-text{font-size:15px;color:rgba(245,240,232,.52);line-height:1.75;}
+
+/* ════════════════ FAQ ════════════════ */
+.faq{background:var(--bg2);}
+.faq-list{max-width:680px;margin:48px auto 0;}
+.faq-item{border-bottom:1px solid var(--border);}
+.faq-q{
+  width:100%;background:none;border:none;color:var(--white);
+  font-family:'Syne',sans-serif;font-size:15px;font-weight:600;
+  padding:20px 0;text-align:left;cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+}
+.faq-ic{font-size:22px;color:var(--gold);flex-shrink:0;transition:transform .3s;line-height:1;}
+.faq-q.open .faq-ic{transform:rotate(45deg);}
+.faq-a{font-size:14px;color:rgba(245,240,232,.5);line-height:1.75;max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s;}
+.faq-a.open{max-height:200px;padding-bottom:20px;}
+
+/* ════════════════ CTA FINAL ════════════════ */
+.final{
+  padding:100px 22px;text-align:center;
+  background:radial-gradient(ellipse 80% 55% at 50% 50%,rgba(200,68,10,.14) 0%,transparent 65%);
+}
+.final h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(44px,9vw,92px);letter-spacing:3px;line-height:.92;margin-bottom:18px;}
+.final h2 em{color:var(--gold);font-style:normal;display:block;}
+.final p{font-size:16px;color:rgba(245,240,232,.5);max-width:480px;margin:0 auto 36px;line-height:1.75;}
+.btn-final{
+  display:inline-flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,var(--rust),var(--rust2));
+  color:#fff;border:none;padding:20px 46px;border-radius:12px;
+  font-family:'Syne',sans-serif;font-size:18px;font-weight:800;
+  cursor:pointer;text-decoration:none;transition:all .25s;
+  box-shadow:0 18px 48px rgba(200,68,10,.38);
+}
+.btn-final:hover{transform:translateY(-3px);box-shadow:0 26px 60px rgba(200,68,10,.5);}
+.final-trust{margin-top:18px;font-size:12px;color:var(--mid);}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--border);padding:30px 22px;text-align:center;}
+.foot-logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:4px;color:rgba(212,168,67,.25);margin-bottom:7px;}
+footer p{font-size:12px;color:#2a2a2a;}
+
+/* ── STICKY BOTTOM BAR (mobile) ── */
+.sticky{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;z-index:500;
+  background:rgba(7,7,7,.97);backdrop-filter:blur(14px);
+  border-top:1px solid var(--border);
+  padding:11px 18px;align-items:center;justify-content:space-between;gap:10px;
+}
+.sticky-left strong{display:block;font-family:'Syne',sans-serif;font-size:14px;color:var(--gold);}
+.sticky-left span{font-size:11px;color:var(--mid);}
+.sticky .btn-buy{width:auto;font-size:14px;padding:12px 22px;box-shadow:none;}
+
+@media(max-width:780px){
+  .sol-wrap{grid-template-columns:1fr;gap:30px;}
+  .val-stats{grid-template-columns:1fr;}
+  .sticky{display:flex;}
+  .ben-grid{grid-template-columns:1fr;}
+  .dep-grid{grid-template-columns:1fr;}
+  .pain-grid{grid-template-columns:1fr;}
+  section{padding:66px 0;}
+  .price-card{padding:32px 18px;}
+  .guar-box{padding:28px 18px;}
+  .val-box{padding:28px 18px;}
+  .hero{padding-bottom:96px;}
+}
+@media(max-width:480px){
+  .val-stats{grid-template-columns:1fr 1fr;}
+}
+
+/* ════════════════ PARA QUEM É ════════════════ */
+.forquem{background:var(--bg2);}
+.forquem-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:12px;margin-top:46px;
+}
+.fq-card{
+  background:#0d0d0d;border:1px solid var(--border);border-radius:14px;
+  padding:22px 14px;text-align:center;
+  transition:all .3s;cursor:default;position:relative;overflow:hidden;
+}
+.fq-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(212,168,67,.06),transparent);
+  opacity:0;transition:opacity .3s;
+}
+.fq-card:hover::before{opacity:1;}
+.fq-card:hover{border-color:rgba(212,168,67,.28);transform:translateY(-4px);}
+.fq-icon{font-size:34px;margin-bottom:10px;}
+.fq-label{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:3px;}
+.fq-sub{font-size:11px;color:var(--mid);line-height:1.4;}
+
+/* ════════════════ DEMO MOCKUP ════════════════ */
+.demo{padding:90px 0;}
+.demo-inner{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:60px;align-items:center;
+}
+.demo-text .tag{margin-bottom:16px;}
+.demo-text h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5.5vw,60px);letter-spacing:2px;line-height:.95;margin-bottom:14px;}
+.demo-text h2 em{color:var(--gold);font-style:normal;}
+.demo-text p{font-size:15px;color:rgba(245,240,232,.52);line-height:1.8;margin-bottom:28px;}
+.demo-steps-mini{display:flex;flex-direction:column;gap:12px;}
+.dsm{display:flex;align-items:center;gap:12px;font-size:13px;}
+.dsm-num{
+  flex-shrink:0;width:26px;height:26px;border-radius:50%;
+  background:linear-gradient(135deg,var(--rust),var(--rust2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:13px;color:#fff;
+}
+.dsm-text strong{display:block;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.dsm-text span{font-size:11px;color:var(--mid);}
+
+/* animated demo phone */
+.demo-phone-wrap{position:relative;}
+.demo-phone{
+  width:240px;margin:0 auto;
+  background:#0c0c0c;border-radius:38px;
+  border:2px solid #1c1c1c;overflow:hidden;
+  box-shadow:0 50px 100px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.04);
+}
+.demo-phone .p-notch{height:20px;background:#060606;border-radius:0 0 12px 12px;width:64px;margin:0 auto;}
+.demo-phone .p-body{padding:11px;background:#090909;min-height:400px;position:relative;}
+
+/* screens that animate in/out */
+.dscreen{
+  position:absolute;inset:11px;
+  opacity:0;transition:opacity .5s ease;
+  pointer-events:none;
+}
+.dscreen.active{opacity:1;pointer-events:auto;}
+
+/* screen 1 — landing do cliente */
+.ds1-head{background:#151515;border-radius:8px;padding:8px 10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+.ds1-logo{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:var(--gold);}
+.ds1-hero{background:linear-gradient(135deg,#180804,#151515);border-radius:9px;padding:14px 10px;margin-bottom:8px;text-align:center;border:1px solid #220f08;}
+.ds1-shop{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;color:var(--gold);}
+.ds1-name{font-size:8px;color:#444;margin:2px 0 7px;}
+.ds1-open{display:inline-flex;align-items:center;gap:3px;background:#071408;border:1px solid #1a3a20;color:var(--green);padding:3px 8px;border-radius:10px;font-size:7px;font-weight:700;margin-bottom:8px;}
+.ds1-open-dot{width:3px;height:3px;border-radius:50%;background:var(--green);animation:pd 1.6s ease-in-out infinite;}
+.ds1-btn{background:var(--rust);color:#fff;border-radius:5px;padding:7px;font-size:9px;font-weight:700;text-align:center;font-family:'Syne',sans-serif;}
+.ds1-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:8px;}
+.ds1-strip-item{background:#111;border-radius:5px;padding:5px 3px;text-align:center;}
+.ds1-strip-day{font-size:8px;font-weight:700;color:var(--white);margin-bottom:1px;}
+.ds1-strip-cnt{font-size:7px;color:#444;}
+
+/* screen 2 — escolha do dia */
+.ds2-label{font-size:8px;color:#3a3a3a;font-weight:700;letter-spacing:1px;margin-bottom:6px;}
+.ds2-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px;}
+.ds2-day{background:#141414;border-radius:6px;padding:8px 7px;border-left:3px solid var(--rust);}
+.ds2-day.highlight{border-color:var(--gold);background:#151000;}
+.ds2-day-name{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:var(--gold);}
+.ds2-day-cnt{font-size:7px;color:#333;margin-top:1px;}
+.ds2-day-cnt b{color:var(--green);}
+
+/* screen 3 — escolha do horário */
+.ds3-back{font-size:8px;color:#444;margin-bottom:6px;}
+.ds3-title{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;color:var(--gold);margin-bottom:5px;}
+.ds3-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-bottom:7px;}
+.ds3-slot{background:#141414;border-radius:4px;padding:6px 2px;text-align:center;font-size:8px;font-weight:600;color:#555;transition:all .3s;}
+.ds3-slot.sel{border:1px solid var(--gold);color:var(--gold);background:#151000;}
+.ds3-slot.pulse-sel{animation:slot-pulse .6s ease;}
+@keyframes slot-pulse{0%{transform:scale(1);}50%{transform:scale(1.1);}100%{transform:scale(1);}}
+.ds3-btn{background:linear-gradient(135deg,var(--rust),var(--rust2));color:#fff;border-radius:5px;padding:7px;font-size:9px;font-weight:700;text-align:center;font-family:'Syne',sans-serif;}
+
+/* screen 4 — formulário */
+.ds4-back{font-size:8px;color:#444;margin-bottom:6px;}
+.ds4-summary{background:#151515;border-left:3px solid var(--rust);border-radius:5px;padding:7px 8px;margin-bottom:9px;font-size:8px;line-height:1.7;color:#888;}
+.ds4-summary b{color:var(--white);}
+.ds4-field{margin-bottom:7px;}
+.ds4-label{font-size:7px;color:#444;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}
+.ds4-input{background:#151515;border:1px solid #2a2a2a;border-radius:4px;padding:6px 7px;font-size:8px;color:var(--white);width:100%;}
+.ds4-input.filled{border-color:rgba(212,168,67,.4);color:var(--white);}
+.ds4-btn{background:linear-gradient(135deg,var(--rust),var(--rust2));color:#fff;border-radius:5px;padding:7px;font-size:9px;font-weight:700;text-align:center;font-family:'Syne',sans-serif;margin-top:4px;}
+
+/* screen 5 — sucesso */
+.ds5-icon{text-align:center;font-size:32px;margin:10px 0 6px;}
+.ds5-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;text-align:center;margin-bottom:3px;}
+.ds5-sub{font-size:8px;color:#555;text-align:center;margin-bottom:10px;}
+.ds5-card{background:#0f1a12;border:1px solid rgba(26,154,86,.25);border-radius:7px;padding:9px 10px;}
+.ds5-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1a1a1a;font-size:8px;}
+.ds5-row:last-child{border:none;}
+.ds5-row span:first-child{color:#444;}
+.ds5-row span:last-child{font-weight:700;}
+.ds5-code-box{background:#0a0a0a;border:1px solid #222;border-radius:5px;padding:7px;text-align:center;margin-top:9px;}
+.ds5-code{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:5px;color:var(--gold);}
+.ds5-code-label{font-size:7px;color:#333;}
+
+/* progress dots */
+.demo-dots{display:flex;justify-content:center;gap:6px;margin-top:16px;}
+.demo-dot{width:7px;height:7px;border-radius:50%;background:#222;transition:all .3s;cursor:pointer;}
+.demo-dot.active{background:var(--gold);transform:scale(1.2);}
+
+/* screen label */
+.demo-screen-label{
+  text-align:center;margin-top:10px;
+  font-size:11px;color:var(--mid);font-family:'Syne',sans-serif;
+  min-height:16px;transition:all .3s;
+}
+
+@media(max-width:780px){
+  .demo-inner{grid-template-columns:1fr;gap:32px;}
+  .demo-phone{width:210px;}
+  .forquem-grid{grid-template-columns:repeat(3,1fr);}
+}
+@media(max-width:420px){
+  .forquem-grid{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════
+     1. HERO
+══════════════════════════ -->
+<section class="hero">
+  <div class="hero-aura"></div>
+
+  <div class="hero-eyebrow">
+    <div class="pulse-dot"></div>
+    Sistema de agendamento online
+  </div>
+
+  <h1>
+    Pare de perder<br>
+    tempo marcando<br>
+    <span class="gold">horários</span> no<br>
+    <span class="rust">WhatsApp.</span>
+  </h1>
+
+  <p class="hero-sub">
+    O Agendio permite que seus clientes agendem horários automaticamente — <strong style="color:var(--white);">enquanto você foca no seu trabalho.</strong>
+  </p>
+
+  <div class="cta-group">
+    <a href="https://pay.kiwify.com.br/oRpQmq7" class="btn-main">
+      📅 Começar agora — R$14,90/mês
+    </a>
+    <div class="trust-row">
+      <span>✓</span> 7 dias de garantia
+      &nbsp;·&nbsp;
+      <span>✓</span> Sem instalar nada
+      &nbsp;·&nbsp;
+      <span>✓</span> Cancele quando quiser
+    </div>
+  </div>
+
+  <!-- Mockup -->
+  <div class="mockup-wrap">
+    <div class="mockup-glow"></div>
+    <div class="phone">
+      <div class="p-notch"></div>
+      <div class="p-body">
+        <div class="p-head">
+          <div class="p-logo">Agendio</div>
+          <div class="p-status"><div class="p-sdot"></div>aberto</div>
+        </div>
+        <div class="p-hero">
+          <div class="p-shop">Barbearia do João</div>
+          <div class="p-name">João Silva · Barbeiro</div>
+          <div class="p-badge"><div class="p-badge-dot"></div>Aberto agora</div>
+          <div class="p-btn">📅 Agendar Agora</div>
+        </div>
+        <div class="p-label">ESCOLHA O DIA</div>
+        <div class="p-grid">
+          <div class="p-day"><div class="p-day-name">Segunda</div><div class="p-day-slots"><b>4</b> livres</div></div>
+          <div class="p-day"><div class="p-day-name">Terça</div><div class="p-day-slots"><b>6</b> livres</div></div>
+          <div class="p-day"><div class="p-day-name">Quarta</div><div class="p-day-slots"><b>2</b> livres</div></div>
+          <div class="p-day"><div class="p-day-name">Quinta</div><div class="p-day-slots"><b>5</b> livres</div></div>
+        </div>
+        <div class="p-label">HORÁRIOS — SEGUNDA</div>
+        <div class="p-slots">
+          <div class="p-slot">09:00</div>
+          <div class="p-slot sel">10:00</div>
+          <div class="p-slot">11:00</div>
+          <div class="p-slot">14:00</div>
+          <div class="p-slot">15:00</div>
+          <div class="p-slot">16:00</div>
+        </div>
+        <div class="p-cta">Confirmar Agendamento →</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════
+     2. PROBLEMA
+══════════════════════════ -->
+<section class="prob">
+  <div class="c">
+    <div class="sr" style="text-align:center;">
+      <div class="tag">Você se identifica?</div>
+      <h2 class="display">Isso acontece todo dia<br><em>na sua agenda</em></h2>
+      <p class="sec-sub" style="margin:0 auto 0;">Profissionais autônomos perdem em média <strong style="color:var(--white);">2 horas por dia</strong> só respondendo mensagens para marcar horário. Dá mais de 60 horas por mês jogadas fora.</p>
+    </div>
+    <div class="pain-grid">
+      <div class="pain-card sr sr-d1">
+        <div class="pain-icon">📱</div>
+        <div>
+          <div class="pain-title">WhatsApp virou sua agenda</div>
+          <div class="pain-desc">Você responde "que horário tem?" o dia inteiro e ainda corre o risco de marcar errado.</div>
+        </div>
+      </div>
+      <div class="pain-card sr sr-d2">
+        <div class="pain-icon">😤</div>
+        <div>
+          <div class="pain-title">Clientes que somem</div>
+          <div class="pain-desc">Você demora 10 minutos para responder e o cliente já foi embora buscar a concorrência.</div>
+        </div>
+      </div>
+      <div class="pain-card sr sr-d3">
+        <div class="pain-icon">🌙</div>
+        <div>
+          <div class="pain-title">Mensagens fora de hora</div>
+          <div class="pain-desc">Chegam à noite e no fim de semana — enquanto você está atendendo ou descansando.</div>
+        </div>
+      </div>
+      <div class="pain-card sr sr-d1">
+        <div class="pain-icon">📋</div>
+        <div>
+          <div class="pain-title">Agenda uma bagunça</div>
+          <div class="pain-desc">Horários anotados em vários lugares, sem controle — e sempre tem dupla marcação.</div>
+        </div>
+      </div>
+      <div class="pain-card sr sr-d2">
+        <div class="pain-icon">😰</div>
+        <div>
+          <div class="pain-title">Horários vazios</div>
+          <div class="pain-desc">Clientes cancelam de última hora e você não consegue preencher o buraco a tempo.</div>
+        </div>
+      </div>
+      <div class="pain-card sr sr-d3">
+        <div class="pain-icon">💔</div>
+        <div>
+          <div class="pain-title">Imagem pouco profissional</div>
+          <div class="pain-desc">Seu concorrente já tem link de agendamento. Seus clientes estão percebendo a diferença.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════
+     PARA QUEM É
+══════════════════════════ -->
+<section class="forquem">
+  <div class="c">
+    <div class="sr" style="text-align:center;">
+      <div class="tag">Para quem é</div>
+      <h2 class="display">O Agendio é <em>perfeito</em><br>para o seu negócio</h2>
+      <p class="sec-sub" style="margin:0 auto;">Quando você vê sua profissão aqui, sabe que o sistema foi feito pensando em você.</p>
+    </div>
+    <div class="forquem-grid">
+      <div class="fq-card sr sr-d1">
+        <div class="fq-icon">💈</div>
+        <div class="fq-label">Barbearia</div>
+        <div class="fq-sub">Barber shops e cabelereiros masculinos</div>
+      </div>
+      <div class="fq-card sr sr-d2">
+        <div class="fq-icon">💇</div>
+        <div class="fq-label">Salão de Beleza</div>
+        <div class="fq-sub">Cabelereiros e hair stylists</div>
+      </div>
+      <div class="fq-card sr sr-d3">
+        <div class="fq-icon">💅</div>
+        <div class="fq-label">Manicure & Nail</div>
+        <div class="fq-sub">Nail designers e podólogos</div>
+      </div>
+      <div class="fq-card sr sr-d1">
+        <div class="fq-icon">✨</div>
+        <div class="fq-label">Estética</div>
+        <div class="fq-sub">Esteticistas e clínicas de estética</div>
+      </div>
+      <div class="fq-card sr sr-d2">
+        <div class="fq-icon">🎨</div>
+        <div class="fq-label">Estúdio de Tattoo</div>
+        <div class="fq-sub">Tatuadores e artistas corporais</div>
+      </div>
+      <div class="fq-card sr sr-d3">
+        <div class="fq-icon">💪</div>
+        <div class="fq-label">Personal Trainer</div>
+        <div class="fq-sub">Professores e coaches fitness</div>
+      </div>
+      <div class="fq-card sr sr-d1">
+        <div class="fq-icon">🏥</div>
+        <div class="fq-label">Clínica de Saúde</div>
+        <div class="fq-sub">Fisioterapeutas e massoterapeutas</div>
+      </div>
+      <div class="fq-card sr sr-d2">
+        <div class="fq-icon">📚</div>
+        <div class="fq-label">Professor Particular</div>
+        <div class="fq-sub">Tutores e professores de idiomas</div>
+      </div>
+      <div class="fq-card sr sr-d3">
+        <div class="fq-icon">🏪</div>
+        <div class="fq-label">Qualquer negócio</div>
+        <div class="fq-sub">Se você vende tempo, o Agendio é para você</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════
+     3. SOLUÇÃO
+══════════════════════════ -->
+<section>
+  <div class="c">
+    <div class="sol-wrap">
+      <div class="sr">
+        <div class="tag green">A solução</div>
+        <h2 class="display">Sua agenda online.<br><em>Automática.</em><br>24 horas.</h2>
+        <p style="font-size:15px;color:rgba(245,240,232,.52);line-height:1.8;margin-bottom:22px;">O Agendio cria um link de agendamento personalizado para o seu negócio. Seus clientes abrem, veem os horários disponíveis e marcam sozinhos. Sem precisar falar com você.</p>
+        <a href="https://pay.kiwify.com.br/oRpQmq7" class="btn-main" style="font-size:15px;padding:14px 30px;display:inline-flex;">
+          Quero o meu agora →
+        </a>
+      </div>
+      <div class="sol-card sr">
+        <div class="sol-row">
+          <div class="sol-check">✓</div>
+          <div class="sol-item">
+            <strong>Agendamento automático 24h</strong>
+            <span>Clientes marcam mesmo quando você está atendendo ou dormindo</span>
+          </div>
+        </div>
+        <div class="sol-row">
+          <div class="sol-check">✓</div>
+          <div class="sol-item">
+            <strong>Regra dos 10 minutos</strong>
+            <span>Cliente não chegou? O horário é liberado automaticamente</span>
+          </div>
+        </div>
+        <div class="sol-row">
+          <div class="sol-check">✓</div>
+          <div class="sol-item">
+            <strong>Integração com WhatsApp</strong>
+            <span>Envie confirmações e lembretes com um único clique</span>
+          </div>
+        </div>
+        <div class="sol-row">
+          <div class="sol-check">✓</div>
+          <div class="sol-item">
+            <strong>Painel administrativo completo</strong>
+            <span>Toda sua agenda organizada, dia a dia, no celular</span>
+          </div>
+        </div>
+        <div class="sol-row">
+          <div class="sol-check">✓</div>
+          <div class="sol-item">
+            <strong>Bloqueio de emergência</strong>
+            <span>Surgiu um imprevisto? Feche sua agenda em um toque</span>
+          </div>
+        </div>
+        <div class="sol-row">
+          <div class="sol-check">✓</div>
+          <div class="sol-item">
+            <strong>Código de cancelamento</strong>
+            <span>O cliente cancela sozinho pelo link — sem te chamar</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════
+     4. BENEFÍCIOS
+══════════════════════════ -->
+<section class="ben">
+  <div class="c">
+    <div class="sr" style="text-align:center;">
+      <div class="tag">Benefícios</div>
+      <h2 class="display">Tudo que você precisa.<br><em>Nada que não precisa.</em></h2>
+    </div>
+    <div class="ben-grid">
+      <div class="ben-card sr sr-d1">
+        <div class="ben-icon">🕐</div>
+        <div class="ben-title">Agendamento Automático</div>
+        <div class="ben-desc">Seus clientes marcam horários disponíveis sozinhos, sem precisar falar com você. Funciona 24h, 7 dias por semana.</div>
+      </div>
+      <div class="ben-card sr sr-d2">
+        <div class="ben-icon">📋</div>
+        <div class="ben-title">Agenda Organizada</div>
+        <div class="ben-desc">Todos os horários ficam registrados em um só lugar, com nome e telefone de cada cliente. Chega de papel e confusão.</div>
+      </div>
+      <div class="ben-card sr sr-d3">
+        <div class="ben-icon">⚡</div>
+        <div class="ben-title">Mais Produtividade</div>
+        <div class="ben-desc">Pare de perder tempo respondendo mensagens. Foque 100% no atendimento e aumente sua renda mensal.</div>
+      </div>
+      <div class="ben-card sr sr-d1">
+        <div class="ben-icon">💼</div>
+        <div class="ben-title">Imagem Profissional</div>
+        <div class="ben-desc">Ter um sistema de agendamento passa muito mais confiança. Seus clientes vão perceber — e comentar.</div>
+      </div>
+      <div class="ben-card sr sr-d2">
+        <div class="ben-icon">📲</div>
+        <div class="ben-title">Lembretes pelo WhatsApp</div>
+        <div class="ben-desc">Envie lembretes com um clique para reduzir faltas e cancelamentos de última hora.</div>
+      </div>
+      <div class="ben-card sr sr-d3">
+        <div class="ben-icon">📱</div>
+        <div class="ben-title">100% no Celular</div>
+        <div class="ben-desc">Otimizado para mobile. Você gerencia sua agenda pelo celular. Seus clientes agendam pelo celular deles.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════
+     5. COMO FUNCIONA
+══════════════════════════ -->
+<section>
+  <div class="c">
+    <div class="sr" style="text-align:center;">
+      <div class="tag">Como funciona</div>
+      <h2 class="display">Pronto em menos<br>de <em>5 minutos</em></h2>
+      <p class="sec-sub" style="margin:0 auto;">Sem instalar nada. Sem saber de tecnologia. Se você usa WhatsApp, você usa o Agendio.</p>
+    </div>
+    <div class="steps">
+      <div class="step sr">
+        <div class="step-num">1</div>
+        <div>
+          <h4>Você cria sua agenda no sistema</h4>
+          <p>Acesse o Agendio, configure seu tipo de negócio, nome, horários de trabalho e duração de cada atendimento. Em 2 minutos está pronto.</p>
+        </div>
+      </div>
+      <div class="step sr">
+        <div class="step-num">2</div>
+        <div>
+          <h4>Compartilha seu link de agendamento</h4>
+          <p>Você recebe um link único. Manda no WhatsApp, coloca na bio do Instagram, no Google Meu Negócio, onde quiser.</p>
+        </div>
+      </div>
+      <div class="step sr">
+        <div class="step-num">3</div>
+        <div>
+          <h4>Clientes escolhem o horário disponível</h4>
+          <p>Eles abrem o link, veem os dias e horários livres, escolhem e colocam nome e telefone. Sem cadastro, sem app.</p>
+        </div>
+      </div>
+      <div class="step sr">
+        <div class="step-num">4</div>
+        <div>
+          <h4>O sistema reserva automaticamente</h4>
+          <p>O horário é bloqueado na hora. Você vê tudo no painel e só precisa aparecer para atender.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════
+     6. DEPOIMENTOS
+══════════════════════════ -->
+<section class="dep">
+  <div class="c">
+    <div class="sr" style="text-align:center;">
+      <div class="tag">Depoimentos</div>
+      <h2 class="display">Quem já usa<br><em>o Agendio</em></h2>
+    </div>
+    <div class="dep-grid">
+      <div class="dep-card sr sr-d1">
+        <div class="dep-stars">★★★★★</div>
+        <div class="dep-text">"Minha barbearia ficou completamente diferente. Antes eu ficava o dia inteiro no WhatsApp. Agora os clientes agendam sozinhos e eu só apareço para trabalhar."</div>
+        <div class="dep-author">
+          <div class="dep-avatar" style="background:linear-gradient(135deg,#c8440a,#e05510);">C</div>
+          <div>
+            <div class="dep-name">Carlos Eduardo</div>
+            <div class="dep-job">Barbeiro · Rio de Janeiro</div>
+          </div>
+        </div>
+      </div>
+      <div class="dep-card sr sr-d2">
+        <div class="dep-stars">★★★★★</div>
+        <div class="dep-text">"Agora meus clientes agendam sozinhos e eu não fico mais presa ao WhatsApp. Minha produtividade dobrou e consigo atender muito mais gente por mês."</div>
+        <div class="dep-author">
+          <div class="dep-avatar" style="background:linear-gradient(135deg,#b0308a,#d04aaa);">M</div>
+          <div>
+            <div class="dep-name">Mariana Costa</div>
+            <div class="dep-job">Manicure · São Paulo</div>
+          </div>
+        </div>
+      </div>
+      <div class="dep-card sr sr-d3">
+        <div class="dep-stars">★★★★★</div>
+        <div class="dep-text">"Como personal trainer minha agenda era um caos. Com o Agendio cada aluno escolhe o horário e eu consigo planejar minha semana inteira com antecedência."</div>
+        <div class="dep-author">
+          <div class="dep-avatar" style="background:linear-gradient(135deg,#c87010,#e09030);">R</div>
+          <div>
+            <div class="dep-name">Rafael Mendes</div>
+            <div class="dep-job">Personal Trainer · BH</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════
+     7. VALOR
+══════════════════════════ -->
+<section>
+  <div class="c">
+    <div class="sr" style="text-align:center;">
+      <div class="tag">Quanto vale seu tempo?</div>
+      <h2 class="display">A conta<br><em>é simples</em></h2>
+    </div>
+    <div class="val-box sr">
+      <h3>1 cliente a mais por mês<br>já paga <em>o sistema inteiro</em></h3>
+      <p>Se você cobra R$50 por atendimento, basta um agendamento a mais por mês para o Agendio se pagar. Na prática, profissionais que usam o sistema relatam ganhar entre 3 e 8 atendimentos extras por mês — porque a agenda fica acessível o tempo todo.</p>
+      <div class="val-stats">
+        <div class="vstat">
+          <div class="n">2h</div>
+          <div class="l">economizadas por dia em mensagens</div>
+        </div>
+        <div class="vstat">
+          <div class="n">24h</div>
+          <div class="l">sua agenda disponível para clientes</div>
+        </div>
+        <div class="vstat">
+          <div class="n">5min</div>
+          <div class="l">para configurar e já começar</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════
+     8. OFERTA
+══════════════════════════ -->
+<section class="price">
+  <div class="c">
+    <div class="sr">
+      <div class="tag" style="display:block;text-align:center;max-width:200px;margin:0 auto 16px;">Investimento</div>
+      <h2 class="display" style="text-align:center;">Um preço justo.<br><em>Para quem trabalha duro.</em></h2>
+    </div>
+    <div class="price-card sr">
+      <div class="price-ribbon">🔥 Preço de lançamento</div>
+      <div class="price-name">Plano Pioneiro</div>
+      <div class="price-desc">Para os primeiros usuários do Agendio</div>
+      <div class="price-old">De R$29,90/mês</div>
+      <div class="price-val">
+        <span class="price-cur">R$</span>
+        <span class="price-big">14</span>
+        <span class="price-dec">,90</span>
+      </div>
+      <div class="price-period">por mês · cancele quando quiser</div>
+      <ul class="price-list">
+        <li><span class="pcheck">✓</span> Agendamentos ilimitados</li>
+        <li><span class="pcheck">✓</span> Painel administrativo completo</li>
+        <li><span class="pcheck">✓</span> Integração com WhatsApp</li>
+        <li><span class="pcheck">✓</span> Regra dos 10 minutos (no-show automático)</li>
+        <li><span class="pcheck">✓</span> Bloqueio de emergência</li>
+        <li><span class="pcheck">✓</span> Código de cancelamento para clientes</li>
+        <li><span class="pcheck">✓</span> Funciona em qualquer celular</li>
+        <li><span class="pcheck">✓</span> Suporte pelo WhatsApp</li>
+      </ul>
+      <a href="https://pay.kiwify.com.br/oRpQmq7" class="btn-buy">
+        Começar agora por R$14,90/mês →
+      </a>
+      <div class="price-guar">
+        🛡️ <b>Garantia de 7 dias</b> — devolução 100% sem perguntas
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider" style="margin-top:88px;"></div>
+
+<!-- ══════════════════════════
+     9. GARANTIA
+══════════════════════════ -->
+<section style="background:var(--bg2);">
+  <div class="c">
+    <div class="guar-box sr">
+      <div class="guar-icon">🛡️</div>
+      <div class="guar-title">Garantia de 7 dias</div>
+      <div class="guar-text">
+        Experimente o Agendio por 7 dias completos. Se por qualquer motivo você não gostar — é só nos chamar e devolvemos 100% do seu dinheiro. Sem burocracia, sem perguntas, sem enrolação.<br><br>
+        <strong style="color:var(--white);">Você não tem nada a perder. Só a ganhar.</strong>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════
+     DEMO — SISTEMA AO VIVO
+══════════════════════════ -->
+<section class="demo">
+  <div class="c">
+    <div class="demo-inner">
+      <div class="demo-text sr">
+        <div class="tag">Veja funcionando</div>
+        <h2>É exatamente assim<br>que o seu cliente<br><em>vai agendar.</em></h2>
+        <p>Do lado direito você está vendo o sistema em tempo real. É assim que seus clientes vão enxergar quando acessarem o link da sua agenda.</p>
+        <div class="demo-steps-mini">
+          <div class="dsm">
+            <div class="dsm-num">1</div>
+            <div class="dsm-text"><strong>Vê sua página com horários disponíveis</strong><span>Aberta, profissional, direto no celular</span></div>
+          </div>
+          <div class="dsm">
+            <div class="dsm-num">2</div>
+            <div class="dsm-text"><strong>Escolhe o dia e o horário</strong><span>Só aparecem os horários livres</span></div>
+          </div>
+          <div class="dsm">
+            <div class="dsm-num">3</div>
+            <div class="dsm-text"><strong>Coloca nome e telefone</strong><span>Sem cadastro, sem app, sem senha</span></div>
+          </div>
+          <div class="dsm">
+            <div class="dsm-num">4</div>
+            <div class="dsm-text"><strong>Agendamento confirmado</strong><span>Você recebe, o horário fica bloqueado</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-phone-wrap sr sr-d2">
+        <div class="demo-phone">
+          <div class="p-notch"></div>
+          <div class="p-body" style="min-height:440px;position:relative;">
+
+            <!-- TELA 1: Landing do cliente -->
+            <div class="dscreen active" id="ds1">
+              <div class="ds1-head">
+                <div class="ds1-logo">Agendio</div>
+                <div style="display:flex;align-items:center;gap:4px;font-size:7px;color:#333;"><div class="ds1-open-dot"></div>aberto</div>
+              </div>
+              <div class="ds1-hero">
+                <div class="ds1-shop">Barbearia do João</div>
+                <div class="ds1-name">João Silva · Barbeiro</div>
+                <div class="ds1-open"><div class="ds1-open-dot"></div>Aberto agora</div>
+                <div class="ds1-btn">📅 Agendar Agora</div>
+              </div>
+              <div style="font-size:7px;color:#333;font-weight:700;letter-spacing:1px;margin-bottom:5px;">PRÓXIMOS DIAS</div>
+              <div class="ds1-strip">
+                <div class="ds1-strip-item"><div class="ds1-strip-day">Seg</div><div class="ds1-strip-cnt">4 livres</div></div>
+                <div class="ds1-strip-item"><div class="ds1-strip-day">Ter</div><div class="ds1-strip-cnt">6 livres</div></div>
+                <div class="ds1-strip-item"><div class="ds1-strip-day">Qua</div><div class="ds1-strip-cnt">2 livres</div></div>
+              </div>
+            </div>
+
+            <!-- TELA 2: Escolha o dia -->
+            <div class="dscreen" id="ds2">
+              <div style="font-size:8px;color:#444;margin-bottom:8px;">← Voltar</div>
+              <div class="ds2-label">ESCOLHA O DIA</div>
+              <div class="ds2-grid">
+                <div class="ds2-day highlight"><div class="ds2-day-name">Segunda</div><div class="ds2-day-cnt"><b>4</b> livres</div></div>
+                <div class="ds2-day"><div class="ds2-day-name">Terça</div><div class="ds2-day-cnt"><b>6</b> livres</div></div>
+                <div class="ds2-day"><div class="ds2-day-name">Quarta</div><div class="ds2-day-cnt"><b>2</b> livres</div></div>
+                <div class="ds2-day"><div class="ds2-day-name">Quinta</div><div class="ds2-day-cnt"><b>5</b> livres</div></div>
+                <div class="ds2-day"><div class="ds2-day-name">Sexta</div><div class="ds2-day-cnt"><b>3</b> livres</div></div>
+                <div class="ds2-day"><div class="ds2-day-name">Sábado</div><div class="ds2-day-cnt"><b>4</b> livres</div></div>
+              </div>
+            </div>
+
+            <!-- TELA 3: Escolha o horário -->
+            <div class="dscreen" id="ds3">
+              <div class="ds3-back">← Voltar</div>
+              <div class="ds3-title">Segunda, 24 Mar</div>
+              <div class="ds3-grid">
+                <div class="ds3-slot">09:00</div>
+                <div class="ds3-slot sel pulse-sel" id="ds3-sel">10:00</div>
+                <div class="ds3-slot">11:00</div>
+                <div class="ds3-slot">14:00</div>
+                <div class="ds3-slot">15:00</div>
+                <div class="ds3-slot">16:00</div>
+              </div>
+              <div class="ds3-btn">Continuar →</div>
+            </div>
+
+            <!-- TELA 4: Formulário -->
+            <div class="dscreen" id="ds4">
+              <div class="ds4-back">← Voltar</div>
+              <div style="font-size:10px;font-family:'Bebas Neue',sans-serif;letter-spacing:1px;margin-bottom:6px;">Seus Dados</div>
+              <div class="ds4-summary">
+                <b>📅 Segunda, 24 Mar</b><br>
+                🕐 10:00 · Barbearia do João
+              </div>
+              <div class="ds4-field">
+                <div class="ds4-label">Nome completo</div>
+                <div class="ds4-input filled">Carlos Mendes</div>
+              </div>
+              <div class="ds4-field">
+                <div class="ds4-label">WhatsApp / Telefone</div>
+                <div class="ds4-input filled">(21) 99999-0000</div>
+              </div>
+              <div class="ds4-btn">Confirmar Agendamento</div>
+            </div>
+
+            <!-- TELA 5: Sucesso -->
+            <div class="dscreen" id="ds5">
+              <div class="ds5-icon">✅</div>
+              <div class="ds5-title">Agendado!</div>
+              <div class="ds5-sub">Horário confirmado com sucesso</div>
+              <div class="ds5-card">
+                <div class="ds5-row"><span>Cliente</span><span>Carlos Mendes</span></div>
+                <div class="ds5-row"><span>Dia</span><span>Seg, 24 Mar</span></div>
+                <div class="ds5-row"><span>Horário</span><span style="color:var(--gold);">10:00</span></div>
+                <div class="ds5-row"><span>Local</span><span>Barbearia do João</span></div>
+              </div>
+              <div class="ds5-code-box">
+                <div class="ds5-code">B7F2</div>
+                <div class="ds5-code-label">Código de cancelamento</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <div class="demo-dots">
+          <div class="demo-dot active" onclick="goToScreen(0)"></div>
+          <div class="demo-dot" onclick="goToScreen(1)"></div>
+          <div class="demo-dot" onclick="goToScreen(2)"></div>
+          <div class="demo-dot" onclick="goToScreen(3)"></div>
+          <div class="demo-dot" onclick="goToScreen(4)"></div>
+        </div>
+        <div class="demo-screen-label" id="demo-label">Tela inicial — o que seu cliente vê</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════
+     10. FAQ
+══════════════════════════ -->
+<section class="faq">
+  <div class="c">
+    <div class="sr" style="text-align:center;">
+      <div class="tag">Dúvidas</div>
+      <h2 class="display">Perguntas<br><em>frequentes</em></h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" onclick="faq(this)">Preciso instalar algum aplicativo? <span class="faq-ic">+</span></button>
+        <div class="faq-a">Não. O Agendio funciona 100% pelo navegador do celular ou computador — Chrome, Safari, Firefox. Você e seus clientes acessam pelo link, sem baixar nada.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="faq(this)">Meus clientes precisam criar cadastro? <span class="faq-ic">+</span></button>
+        <div class="faq-a">Não. Seus clientes abrem o link, escolhem o horário, colocam nome e telefone. Pronto. Sem cadastro, sem senha, sem complicação nenhuma.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="faq(this)">Funciona bem no celular? <span class="faq-ic">+</span></button>
+        <div class="faq-a">Sim, o Agendio foi criado pensando primeiro no celular. Tanto o painel de administrador quanto a tela de agendamento dos clientes são 100% otimizados para mobile.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="faq(this)">Posso configurar meus próprios horários? <span class="faq-ic">+</span></button>
+        <div class="faq-a">Sim. Você define os dias da semana que trabalha, o horário de início e fim, a duração de cada atendimento, a pausa do almoço, folgas e feriados específicos.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="faq(this)">O que acontece se eu cancelar a assinatura? <span class="faq-ic">+</span></button>
+        <div class="faq-a">Você perde o acesso ao final do período já pago. Sem multa, sem fidelidade mínima. Cancele quando quiser, direto pelo painel da Kiwify.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="faq(this)">Tenho suporte se precisar de ajuda? <span class="faq-ic">+</span></button>
+        <div class="faq-a">Sim. O suporte é pelo WhatsApp. Se tiver qualquer dúvida na configuração ou no uso, é só chamar que respondemos o mais rápido possível.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════
+     11. CTA FINAL
+══════════════════════════ -->
+<section class="final">
+  <div class="container" style="max-width:1040px;margin:0 auto;">
+    <h2 class="sr">
+      Chega de perder<br>
+      cliente por<br>
+      <em>falta de resposta.</em>
+    </h2>
+    <p class="sr sr-d1">Por R$14,90 por mês — menos que uma pizza — você transforma a gestão do seu negócio. Atende mais, ganha mais, estresa menos.</p>
+    <a href="https://pay.kiwify.com.br/oRpQmq7" class="btn-final sr sr-d2">
+      📅 Começar a usar o Agendio agora →
+    </a>
+    <div class="final-trust sr sr-d3">
+      🛡️ 7 dias de garantia &nbsp;·&nbsp; ✓ Sem instalar nada &nbsp;·&nbsp; ✓ Cancele quando quiser
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-logo">Agendio</div>
+  <p>© 2025 Agendio · Sistema de Agendamento Online</p>
+</footer>
+
+<!-- STICKY BAR mobile -->
+<div class="sticky" id="sticky">
+  <div class="sticky-left">
+    <strong>Agendio — R$14,90/mês</strong>
+    <span>7 dias de garantia · Cancele quando quiser</span>
+  </div>
+  <a href="https://pay.kiwify.com.br/oRpQmq7" class="btn-buy">Começar →</a>
+</div>
+
+<script>
+// FAQ
+function faq(btn){
+  const a=btn.nextElementSibling,open=a.classList.contains('open');
+  document.querySelectorAll('.faq-a').forEach(x=>x.classList.remove('open'));
+  document.querySelectorAll('.faq-q').forEach(x=>x.classList.remove('open'));
+  if(!open){a.classList.add('open');btn.classList.add('open');}
+}
+
+// Scroll reveal
+const io=new IntersectionObserver(es=>{
+  es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('on');});
+},{threshold:.08});
+document.querySelectorAll('.sr').forEach(el=>io.observe(el));
+
+// DEMO PHONE ANIMATION
+const screens = ['ds1','ds2','ds3','ds4','ds5'];
+const labels  = [
+  'Tela inicial — o que seu cliente vê',
+  'Escolhendo o dia disponível',
+  'Selecionando o horário',
+  'Preenchendo os dados',
+  '✅ Agendamento confirmado!'
+];
+let currentScreen = 0;
+let demoTimer;
+
+function goToScreen(idx){
+  document.getElementById(screens[currentScreen]).classList.remove('active');
+  document.querySelectorAll('.demo-dot')[currentScreen].classList.remove('active');
+  currentScreen = idx;
+  document.getElementById(screens[currentScreen]).classList.add('active');
+  document.querySelectorAll('.demo-dot')[currentScreen].classList.add('active');
+  document.getElementById('demo-label').textContent = labels[currentScreen];
+  clearInterval(demoTimer);
+  demoTimer = setInterval(advanceScreen, 2800);
+}
+
+function advanceScreen(){
+  goToScreen((currentScreen + 1) % screens.length);
+}
+
+demoTimer = setInterval(advanceScreen, 2800);
+
+// Sticky bar
+const sticky=document.getElementById('sticky');
+window.addEventListener('scroll',()=>{
+  sticky.style.display=window.scrollY>700?'flex':'none';
+});
+</script>
+</body>
+</html>
