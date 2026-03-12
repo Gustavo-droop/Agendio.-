@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0d0d">
+  <title>Agendio — Carregando...</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/style.css">
+
+  <!-- Firebase SDKs (CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <!-- Módulos compartilhados -->
+  <script src="../shared/firebase.js"></script>
+  <script src="../shared/business-logic.js"></script>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════
+     ESTADO DE CARREGAMENTO
+     Mostrado enquanto busca os dados do negócio no Firestore
+════════════════════════════════════════════════════════ -->
+<div id="state-loading" style="display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:14px;">
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:4px;color:var(--gold);">Agendio</div>
+  <div style="font-size:13px;color:var(--mid);">Carregando...</div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     NEGÓCIO NÃO ENCONTRADO
+════════════════════════════════════════════════════════ -->
+<div id="state-not-found" style="display:none;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:24px;flex-direction:column;gap:12px;">
+  <div style="font-size:48px;">🔍</div>
+  <h2>Negócio não encontrado</h2>
+  <p style="color:var(--mid);font-size:14px;">O link que você acessou não existe ou foi removido.</p>
+  <a href="https://agendio.com.br" style="font-size:13px;color:var(--gold);text-decoration:none;">Ir para o Agendio →</a>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     ASSINATURA VENCIDA
+     Página pública NÃO desaparece — mostra aviso
+     (requisito do sistema SaaS)
+════════════════════════════════════════════════════════ -->
+<div id="state-suspended" style="display:none;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:24px;flex-direction:column;gap:14px;">
+  <div style="font-size:48px;">⏸️</div>
+  <h2 id="suspended-shop-name">Este negócio</h2>
+  <p style="color:var(--mid);font-size:15px;max-width:320px;line-height:1.6;">
+    Este negócio está temporariamente indisponível para novos agendamentos.
+  </p>
+  <p style="color:#333;font-size:12px;">Entre em contato diretamente com o estabelecimento.</p>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     APP PRINCIPAL DE AGENDAMENTO
+     Exibido apenas quando o negócio existe e assinatura está ativa
+════════════════════════════════════════════════════════ -->
+<div id="main-app" style="display:none;">
+
+  <header>
+    <div class="logo">
+      <span id="header-shop-name">Agendio</span>
+      <small id="header-biz-type">Sistema de Agendamento</small>
+    </div>
+    <!-- Sem link admin na página pública -->
+  </header>
+
+  <div id="lock-banner" class="lock-banner">
+    🔒 Agenda fechada temporariamente — tente novamente mais tarde
+  </div>
+  <div id="toast"></div>
+
+  <!-- ── LANDING ── -->
+  <div id="screen-landing" class="screen active">
+    <div class="landing-hero">
+      <div class="biz-type-label" id="hero-biz-label"></div>
+      <h1 id="hero-shop-name">Seu Negócio</h1>
+      <div class="barber-name" id="hero-barber-name"></div>
+      <div class="shop-address" id="hero-address"></div>
+      <div id="open-status-badge"></div>
+      <div class="hours-strip" id="hours-strip"></div>
+      <button class="btn btn-primary"
+        onclick="showScreen('screen-days')"
+        style="max-width:260px;margin:0 auto;display:block;font-size:17px;">
+        📅 Agendar Agora
+      </button>
+    </div>
+    <div id="hot-slots-section" style="display:none;"></div>
+    <div style="text-align:center;margin-top:6px;">
+      <button class="back-btn" onclick="showCancelScreen()" style="font-size:12px;">
+        Cancelar um agendamento
+      </button>
+    </div>
+    <div style="text-align:center;padding:20px 0 8px;font-size:11px;color:#333;letter-spacing:1px;">
+      Powered by <span style="font-family:'Bebas Neue',sans-serif;letter-spacing:2px;color:#444;font-size:13px;">Agendio</span>
+    </div>
+  </div>
+
+  <!-- ── DIAS ── -->
+  <div id="screen-days" class="screen">
+    <button class="back-btn" onclick="showScreen('screen-landing')">← Voltar</button>
+    <h2>Escolha o Dia</h2>
+    <p class="subtitle">Dias disponíveis para agendamento</p>
+    <div class="days-grid" id="days-grid"></div>
+  </div>
+
+  <!-- ── HORÁRIOS ── -->
+  <div id="screen-slots" class="screen">
+    <button class="back-btn" onclick="showScreen('screen-days')">← Voltar</button>
+    <h2 id="slots-day-title"></h2>
+    <p class="subtitle" id="slots-day-date"></p>
+    <div class="slots-grid" id="slots-grid"></div>
+    <button class="btn btn-primary" id="btn-continue-slots" disabled onclick="showFormScreen()">
+      Continuar
+    </button>
+  </div>
+
+  <!-- ── FORMULÁRIO ── -->
+  <div id="screen-form" class="screen">
+    <button class="back-btn" onclick="showScreen('screen-slots')">← Voltar</button>
+    <h2>Seus Dados</h2>
+    <p class="subtitle">Confirme o horário abaixo</p>
+    <div class="summary-box" id="booking-summary"></div>
+    <div class="booking-form">
+      <div class="field">
+        <label>Nome completo</label>
+        <input type="text" id="client-name" placeholder="Ex: João Silva" maxlength="60">
+      </div>
+      <div class="field">
+        <label>WhatsApp / Telefone</label>
+        <input type="tel" id="client-phone" placeholder="(11) 99999-9999" maxlength="20">
+      </div>
+      <button class="btn btn-primary" onclick="confirmBooking()">Confirmar Agendamento</button>
+    </div>
+  </div>
+
+  <!-- ── SUCESSO ── -->
+  <div id="screen-success" class="screen">
+    <div class="success-icon">✅</div>
+    <h2 style="text-align:center;">Agendado!</h2>
+    <p class="subtitle" style="text-align:center;">Seu horário está confirmado</p>
+    <div class="success-card" id="success-details"></div>
+    <div class="cancel-code-box">
+      <div class="cancel-code-label">Código de cancelamento</div>
+      <div class="cancel-code" id="cancel-code-display">----</div>
+      <div class="cancel-code-hint">Guarde este código. Use-o para cancelar se precisar.</div>
+    </div>
+    <div id="reminder-notice" style="display:none;"
+      class="info-box">📲 Você receberá um lembrete via WhatsApp antes do horário.</div>
+    <button class="btn btn-wa" onclick="openWhatsApp()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+      </svg>
+      Confirmar pelo WhatsApp
+    </button>
+    <button class="btn btn-secondary" onclick="showScreen('screen-landing')">Voltar ao início</button>
+  </div>
+
+  <!-- ── CANCELAMENTO ── -->
+  <div id="screen-cancel" class="screen">
+    <button class="back-btn" onclick="showScreen('screen-landing')">← Voltar</button>
+    <h2>Cancelar Agendamento</h2>
+    <p class="subtitle">Use o código que você recebeu ao agendar</p>
+    <div class="booking-form">
+      <div class="field">
+        <label>Código de cancelamento</label>
+        <input type="text" id="cancel-code-input" placeholder="Ex: A4B7" maxlength="4"
+          style="text-transform:uppercase;letter-spacing:4px;font-size:20px;text-align:center;">
+      </div>
+      <button class="btn btn-danger" onclick="processCancellation()">Cancelar meu horário</button>
+    </div>
+    <div id="cancel-result" style="margin-top:14px;"></div>
+  </div>
+
+</div><!-- /main-app -->
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  AGENDIO SaaS — public/app.js (inline)
+//  Lógica da página pública de agendamento.
+//  Reutiliza business-logic.js — apenas o storage foi adaptado.
+// ═══════════════════════════════════════════════════════════════
+
+// ── ESTADO GLOBAL DA PÁGINA PÚBLICA ─────────────────────────────
+let businessId   = null;  // ID do negócio no Firestore
+let businessData = null;  // Documento completo do negócio
+let settings     = null;  // Config (antes era af_cfg no localStorage)
+let dayCache     = {};    // Cache local dos agendamentos do dia: { dateKey: dayData }
+let currentDay   = null;
+let selectedSlot = null;
+let lastBooking  = null;
+let toastTimer   = null;
+
+// ── INICIALIZAÇÃO ────────────────────────────────────────────────
+/**
+ * Ponto de entrada: lê o slug da URL e carrega os dados do negócio.
+ * URL esperada: agendio.com/barbearia-do-joao
+ */
+async function init() {
+  // Extrai o slug do pathname: "/barbearia-do-joao" → "barbearia-do-joao"
+  const slug = window.location.pathname.replace(/^\/+|\/+$/g, '') || 
+               new URLSearchParams(window.location.search).get('slug');
+
+  if (!slug) {
+    setState('not-found');
+    return;
+  }
+
+  try {
+    // Busca o negócio pelo slug no Firestore
+    businessData = await BusinessAPI.getBySlug(slug);
+
+    if (!businessData) {
+      setState('not-found');
+      return;
+    }
+
+    businessId = businessData.id;
+    settings   = { ...DEFAULT_SETTINGS, ...businessData.config };
+
+    // Verifica status da assinatura
+    if (!Subscription.isActive(businessData)) {
+      // Mostra a página de suspenso (não remove a página — requisito do SaaS)
+      document.getElementById('suspended-shop-name').textContent = businessData.nome_negocio;
+      setState('suspended');
+      await Logger.warn(businessId, 'Acesso à página pública com assinatura vencida');
+      return;
+    }
+
+    // Negócio ativo: inicializa o app
+    setState('app');
+    await bootApp();
+
+  } catch (error) {
+    await Logger.error(null, 'Erro fatal na inicialização da página pública', {
+      slug, error: error.message
+    });
+    setState('not-found');
+  }
+}
+
+/** Alterna entre os estados visuais da página */
+function setState(state) {
+  document.getElementById('state-loading').style.display   = 'none';
+  document.getElementById('state-not-found').style.display = 'none';
+  document.getElementById('state-suspended').style.display = 'none';
+  document.getElementById('main-app').style.display        = 'none';
+
+  if (state === 'not-found') {
+    document.getElementById('state-not-found').style.display = 'flex';
+  } else if (state === 'suspended') {
+    document.getElementById('state-suspended').style.display = 'flex';
+  } else if (state === 'app') {
+    document.getElementById('main-app').style.display = 'block';
+  }
+}
+
+/** Inicializa a aplicação de agendamento */
+async function bootApp() {
+  renderLanding();
+  await renderDays();
+  // Verifica no-shows a cada 15s
+  setInterval(checkNoShows, 15000);
+  // Atualiza countdowns a cada 1s
+  setInterval(updateCountdowns, 1000);
+  // Re-renderiza a cada 1min (slots passados ficam indisponíveis)
+  setInterval(async () => { await renderDays(); renderLanding(); }, 60000);
+  checkNoShows();
+}
+
+// ── SCREEN MANAGEMENT ────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('#main-app .screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ── LANDING ──────────────────────────────────────────────────────
+function renderLanding() {
+  const biz = getBizType(settings.bizType);
+
+  document.getElementById('header-shop-name').textContent = settings.shopName;
+  document.getElementById('header-biz-type').textContent  = biz.label;
+  document.getElementById('hero-shop-name').textContent   = settings.shopName;
+  document.getElementById('hero-barber-name').textContent = settings.barberName;
+  document.getElementById('hero-biz-label').textContent   = biz.label;
+
+  const addrEl = document.getElementById('hero-address');
+  addrEl.textContent   = settings.shopAddress || '';
+  addrEl.style.display = settings.shopAddress ? 'block' : 'none';
+
+  document.title = settings.shopName + ' • Agendio';
+  document.documentElement.style.setProperty('--accent', biz.color);
+
+  const badge = document.getElementById('open-status-badge');
+  badge.innerHTML = isShopOpen(settings)
+    ? `<div class="open-badge"><div class="open-dot"></div>Aberto agora</div>`
+    : `<div class="closed-badge">🔴 Fechado no momento</div>`;
+
+  // Mostra contagem de livres nos próximos 3 dias
+  const days  = getWeekDays(settings);
+  const strip = document.getElementById('hours-strip');
+  strip.innerHTML = days.slice(0, 3).map(day => {
+    const dayData = dayCache[day.key] || {};
+    const free    = getFreeSlots(day.key, dayData, settings);
+    return `<div class="hour-block"><div class="hday">${day.name.slice(0,3)}</div>${free.length} livres</div>`;
+  }).join('');
+
+  renderHotSlots();
+}
+
+function renderHotSlots() {
+  const section  = document.getElementById('hot-slots-section');
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const now      = new Date();
+  const dayData  = dayCache[todayKey] || {};
+  const hot      = [];
+
+  Object.keys(dayData).forEach(time => {
+    const appt = dayData[time];
+    if (!appt) return;
+    const isHot =
+      (appt.freed     && (Date.now() - appt.freedAt)     < 10 * 60 * 1000) ||
+      (appt.cancelled && (Date.now() - appt.cancelledAt) < 10 * 60 * 1000);
+    if (isHot && slotDateTime(todayKey, time) > now) hot.push(time);
+  });
+
+  if (!hot.length) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  section.innerHTML = `
+    <div class="hot-slots">
+      <div class="hot-slots-title">🔥 Horários disponíveis agora — Hoje</div>
+      ${hot.map(t => `
+        <div class="hot-slot-item">
+          <div>
+            <span class="hot-slot-time">${t}</span>
+            <span class="hot-slot-label">⚡ Acabou de abrir</span>
+          </div>
+          <button class="book-now-btn" onclick="quickBook('${todayKey}','${t}')">Agendar agora</button>
+        </div>`).join('')}
+    </div>`;
+}
+
+function quickBook(dayKey, time) {
+  const day = getWeekDays(settings).find(d => d.key === dayKey);
+  if (!day) return;
+  currentDay = day; selectedSlot = time;
+  document.getElementById('booking-summary').innerHTML =
+    `<strong>📅 Dia:</strong> ${day.name}, ${day.label}<br><strong>🕐 Horário:</strong> ${time}`;
+  document.getElementById('client-name').value  = '';
+  document.getElementById('client-phone').value = '';
+  showScreen('screen-form');
+}
+
+// ── DIAS & SLOTS ─────────────────────────────────────────────────
+async function renderDays() {
+  const grid     = document.getElementById('days-grid');
+  const days     = getWeekDays(settings);
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const banner   = document.getElementById('lock-banner');
+
+  settings.locked ? banner.classList.add('visible') : banner.classList.remove('visible');
+  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--mid);padding:16px;">Carregando dias...</div>';
+
+  // Carrega agendamentos dos próximos dias em paralelo
+  await Promise.all(days.map(async day => {
+    dayCache[day.key] = await AppointmentsAPI.getDayAppointments(businessId, day.key);
+  }));
+
+  if (!days.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--mid);padding:26px 0;">
+      Nenhum dia de trabalho configurado</div>`;
+    return;
+  }
+
+  grid.innerHTML = '';
+  days.forEach(day => {
+    const isOff    = settings.offDates?.includes(day.key);
+    const isLocked = settings.locked && day.key === todayKey;
+    const dayData  = dayCache[day.key] || {};
+    const free     = (!isOff && !isLocked) ? getFreeSlots(day.key, dayData, settings) : [];
+    const hasAny   = free.length > 0;
+    const justFreed = free.some(t => isJustFreed(day.key, t, dayData));
+
+    const card = document.createElement('div');
+    card.className = 'day-card' +
+      (isOff     ? ' day-off'      :
+       isLocked  ? ' locked-day'   :
+       !hasAny   ? ' no-slots'     :
+       justFreed ? ' has-available': '');
+
+    const status = isOff    ? 'Folga'           :
+                   isLocked ? '🔒 Fechado hoje'  :
+                   !hasAny  ? 'Sem horários'     :
+                   `<span>${free.length}</span> horários livres`;
+
+    card.innerHTML = `
+      <div class="day-name">${day.name}</div>
+      <div class="day-date">${day.label}</div>
+      <div class="slot-count">${status}</div>`;
+
+    if (hasAny) card.onclick = () => openDay(day);
+    grid.appendChild(card);
+  });
+}
+
+function openDay(day) {
+  currentDay = day; selectedSlot = null;
+  document.getElementById('slots-day-title').textContent = day.name;
+  document.getElementById('slots-day-date').textContent  = day.label;
+  renderSlots();
+  showScreen('screen-slots');
+}
+
+function renderSlots() {
+  const grid    = document.getElementById('slots-grid');
+  const dayData = dayCache[currentDay.key] || {};
+  const free    = getFreeSlots(currentDay.key, dayData, settings);
+  grid.innerHTML = '';
+
+  if (!free.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--mid);padding:16px;">
+      Sem horários disponíveis</div>`;
+  }
+  free.forEach(time => {
+    const freed = isJustFreed(currentDay.key, time, dayData);
+    const btn   = document.createElement('button');
+    btn.className   = 'slot-btn' + (freed ? ' just-freed' : '');
+    btn.textContent = time;
+    btn.onclick     = () => selectSlot(time, btn);
+    grid.appendChild(btn);
+  });
+  document.getElementById('btn-continue-slots').disabled = true;
+}
+
+function selectSlot(time, btn) {
+  selectedSlot = time;
+  document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('btn-continue-slots').disabled = false;
+}
+
+function showFormScreen() {
+  document.getElementById('booking-summary').innerHTML =
+    `<strong>📅 Dia:</strong> ${currentDay.name}, ${currentDay.label}<br><strong>🕐 Horário:</strong> ${selectedSlot}`;
+  document.getElementById('client-name').value  = '';
+  document.getElementById('client-phone').value = '';
+  showScreen('screen-form');
+}
+
+// ── CONFIRMAR AGENDAMENTO ─────────────────────────────────────────
+async function confirmBooking() {
+  const name  = document.getElementById('client-name').value.trim();
+  const phone = document.getElementById('client-phone').value.trim();
+  if (!name)  { showToast('Digite seu nome',     true); return; }
+  if (!phone) { showToast('Digite seu telefone', true); return; }
+
+  // Verifica colisão em tempo real no Firestore
+  const dayData = await AppointmentsAPI.getDayAppointments(businessId, currentDay.key);
+  const existing = dayData[selectedSlot];
+  if (existing && !existing.freed && !existing.cancelled) {
+    showToast('Horário ocupado 😬', true);
+    dayCache[currentDay.key] = dayData; // atualiza cache
+    renderSlots();
+    showScreen('screen-slots');
+    return;
+  }
+
+  const code = genCode();
+  const apptData = {
+    name, phone,
+    bookedAt:       Date.now(),
+    arrived:        false,
+    freed:          false, freedAt: null,
+    countdownStart: null,
+    cancelled:      false, cancelledAt: null,
+    code,
+    business_id:    businessId,  // Associa ao negócio (multi-tenant)
+  };
+
+  try {
+    // Salva no Firestore
+    await AppointmentsAPI.updateSlot(businessId, currentDay.key, selectedSlot, apptData);
+
+    // Atualiza cache local
+    if (!dayCache[currentDay.key]) dayCache[currentDay.key] = {};
+    dayCache[currentDay.key][selectedSlot] = apptData;
+
+    lastBooking = { name, phone, day: currentDay, slot: selectedSlot, code };
+
+    const biz = getBizType(settings.bizType);
+    document.getElementById('success-details').innerHTML = `
+      <div class="row"><span>Cliente</span><span>${name}</span></div>
+      <div class="row"><span>Telefone</span><span>${phone}</span></div>
+      <div class="row"><span>Dia</span><span>${currentDay.name}, ${currentDay.label}</span></div>
+      <div class="row"><span>Horário</span><span>${selectedSlot}</span></div>
+      <div class="row"><span>${biz.label}</span><span>${settings.shopName}</span></div>`;
+
+    document.getElementById('cancel-code-display').textContent = code;
+
+    const notice = document.getElementById('reminder-notice');
+    notice.style.display = (settings.rem1h && settings.waNumber) ? 'block' : 'none';
+
+    await Logger.info(businessId, 'Agendamento criado', { date: currentDay.key, time: selectedSlot, name });
+    showScreen('screen-success');
+    showToast('Agendamento confirmado! ✅');
+
+  } catch (error) {
+    await Logger.error(businessId, 'Falha ao salvar agendamento', {
+      date: currentDay.key, time: selectedSlot, error: error.message
+    });
+    showToast('Erro ao salvar. Tente novamente.', true);
+  }
+}
+
+// ── WHATSAPP ─────────────────────────────────────────────────────
+function openWhatsApp() {
+  if (!lastBooking) return;
+  const biz = getBizType(settings.bizType);
+  const { name, day, slot, code } = lastBooking;
+
+  const msg = `Olá! Acabei de agendar um(a) *${biz.service}* em *${settings.shopName}*.\n\n` +
+              `${biz.icon} *${day.name}, ${day.label} às ${slot}*\n` +
+              `Nome: ${name}\nCódigo: ${code}\n\nAguardo confirmação!`;
+
+  const waNum = settings.waNumber || '';
+  const url   = waNum
+    ? `https://wa.me/55${waNum}?text=${encodeURIComponent(msg)}`
+    : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+}
+
+// ── CANCELAMENTO ─────────────────────────────────────────────────
+function showCancelScreen() {
+  document.getElementById('cancel-code-input').value  = '';
+  document.getElementById('cancel-result').innerHTML  = '';
+  showScreen('screen-cancel');
+}
+
+async function processCancellation() {
+  const inputCode = document.getElementById('cancel-code-input').value.trim().toUpperCase();
+  if (!inputCode || inputCode.length < 4) { showToast('Digite o código completo', true); return; }
+
+  try {
+    // Busca em todos os agendamentos do negócio (últimos 30 dias)
+    const days = getWeekDays(settings);
+    let found  = false;
+
+    for (const day of days) {
+      const dayData = await AppointmentsAPI.getDayAppointments(businessId, day.key);
+      for (const [time, appt] of Object.entries(dayData)) {
+        if (!appt || appt.cancelled || appt.arrived) continue;
+        if (appt.code !== inputCode) continue;
+
+        found = true;
+        const diff = slotDateTime(day.key, time).getTime() - Date.now();
+
+        if (diff < 30 * 60 * 1000 && diff > 0) {
+          document.getElementById('cancel-result').innerHTML =
+            `<div style="background:#2a1010;border:1px solid var(--red);border-radius:8px;padding:13px;font-size:13px;color:#e08080;">
+              ⚠️ Cancelamento não permitido — faltam menos de 30 minutos.
+            </div>`;
+          return;
+        }
+
+        // Cancela o slot no Firestore
+        await AppointmentsAPI.updateSlot(businessId, day.key, time, {
+          ...appt,
+          cancelled:   true,
+          cancelledAt: Date.now(),
+        });
+
+        // Atualiza cache local
+        if (dayCache[day.key]) {
+          dayCache[day.key][time] = { ...appt, cancelled: true, cancelledAt: Date.now() };
+        }
+
+        const [y, m, d] = day.key.split('-');
+        document.getElementById('cancel-result').innerHTML =
+          `<div style="background:#0d2a1a;border:1px solid var(--green);border-radius:8px;padding:13px;font-size:13px;color:#80e0a0;">
+            ✅ Cancelado com sucesso! Horário <strong>${time}</strong> de ${d}/${m} foi liberado.
+          </div>`;
+
+        await Logger.info(businessId, 'Agendamento cancelado pelo cliente', { date: day.key, time, code: inputCode });
+        renderDays();
+        renderLanding();
+        showToast('Horário cancelado e liberado');
+        return;
+      }
+    }
+
+    if (!found) {
+      document.getElementById('cancel-result').innerHTML =
+        `<div style="background:#2a1010;border:1px solid var(--red);border-radius:8px;padding:13px;font-size:13px;color:#e08080;">
+          ❌ Código não encontrado.
+        </div>`;
+    }
+
+  } catch (error) {
+    await Logger.error(businessId, 'Erro no cancelamento', { inputCode, error: error.message });
+    showToast('Erro ao processar. Tente novamente.', true);
+  }
+}
+
+// ── NO-SHOW TIMER ─────────────────────────────────────────────────
+async function checkNoShows() {
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const dayData  = { ...dayCache[todayKey] } || {};
+  const now      = Date.now();
+  let changed    = false;
+
+  for (const [time, appt] of Object.entries(dayData)) {
+    if (!appt || appt.arrived || appt.freed || appt.cancelled) continue;
+
+    const slotMs = slotDateTime(todayKey, time).getTime();
+    if (now >= slotMs && !appt.countdownStart) {
+      dayData[time] = { ...appt, countdownStart: slotMs };
+      await AppointmentsAPI.updateSlot(businessId, todayKey, time, dayData[time]);
+      changed = true;
+    }
+    if (appt.countdownStart && (now - appt.countdownStart) >= NO_SHOW_TIMEOUT) {
+      dayData[time] = { ...appt, freed: true, freedAt: now };
+      await AppointmentsAPI.updateSlot(businessId, todayKey, time, dayData[time]);
+      changed = true;
+      showToast(`⚡ ${time} liberado — cliente não chegou`);
+    }
+  }
+
+  if (changed) {
+    dayCache[todayKey] = dayData;
+    renderDays();
+    renderLanding();
+  }
+}
+
+function updateCountdowns() {
+  // Apenas atualiza o display — lógica nos cards do admin
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────
+function showToast(msg, warn = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = warn ? 'warn' : '';
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3400);
+}
+
+// ── START ─────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

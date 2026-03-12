@@ -1,0 +1,93 @@
+// ═══════════════════════════════════════════════════════════════
+//  AGENDIO SaaS — firestore.rules
+//  Regras de segurança do Firestore.
+//  Garante que cada usuário só acessa dados do próprio negócio.
+//
+//  DEPLOY:
+//    firebase deploy --only firestore:rules
+// ═══════════════════════════════════════════════════════════════
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── FUNÇÕES AUXILIARES ───────────────────────────────────────
+
+    // Verifica se o usuário está autenticado
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    // Verifica se o usuário é o dono do negócio
+    function isOwner(businessId) {
+      return isAuth() &&
+        get(/databases/$(database)/documents/businesses/$(businessId)).data.owner_uid == request.auth.uid;
+    }
+
+    // Verifica se o negócio tem assinatura ativa
+    function hasActiveSubscription(businessId) {
+      let biz = get(/databases/$(database)/documents/businesses/$(businessId)).data;
+      return biz.status == 'ativo' &&
+             biz.data_vencimento > request.time;
+    }
+
+    // ── COLEÇÃO: businesses ──────────────────────────────────────
+    match /businesses/{businessId} {
+
+      // Leitura: qualquer pessoa pode ler o doc público do negócio
+      // (necessário para a página pública buscar por slug)
+      allow read: if true;
+
+      // Criação: qualquer usuário autenticado pode criar seu negócio
+      // (mas somente com o próprio UID como owner_uid)
+      allow create: if isAuth() &&
+                       request.resource.data.owner_uid == request.auth.uid;
+
+      // Atualização: somente o dono pode atualizar
+      // Não pode mudar o owner_uid nem o slug
+      allow update: if isOwner(businessId) &&
+                       request.resource.data.owner_uid == resource.data.owner_uid &&
+                       request.resource.data.slug == resource.data.slug;
+
+      // Deleção: somente o dono pode deletar
+      allow delete: if isOwner(businessId);
+
+      // ── SUBCOLEÇÃO: appointments ─────────────────────────────
+      match /appointments/{dateId} {
+
+        // Leitura: público pode ler agendamentos (necessário para verificar disponibilidade)
+        // O sistema nunca expõe dados pessoais na UI pública — somente slots ocupados
+        allow read: if true;
+
+        // Escrita: público pode criar/editar agendamentos (clientes agendando)
+        // Mas somente se o negócio tiver assinatura ativa
+        allow write: if hasActiveSubscription(businessId);
+
+        // Regra extra: admin pode sempre escrever (marcar chegada, cancelar, etc)
+        allow write: if isOwner(businessId);
+      }
+
+      // ── SUBCOLEÇÃO: logs ─────────────────────────────────────
+      match /logs/{logId} {
+        // Somente o dono pode ler os logs
+        allow read: if isOwner(businessId);
+        // Qualquer um pode criar (sistema de log), mas não editar/deletar
+        allow create: if true;
+        allow update, delete: if false;
+      }
+    }
+
+    // ── COLEÇÃO: payments_log ────────────────────────────────────
+    match /payments_log/{eventId} {
+      // Somente o sistema (Cloud Functions com Admin SDK) pode escrever
+      // Leitura negada para todos via browser
+      allow read, write: if false;
+    }
+
+    // ── COLEÇÃO: global_logs ─────────────────────────────────────
+    match /global_logs/{logId} {
+      // Somente Cloud Functions escrevem
+      allow read, write: if false;
+    }
+  }
+}

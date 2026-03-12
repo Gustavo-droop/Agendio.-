@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agendio — Painel Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/style.css">
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <!-- Módulos compartilhados -->
+  <script src="../shared/firebase.js"></script>
+  <script src="../shared/business-logic.js"></script>
+
+  <style>
+    /* ── Estilos extras do admin ── */
+    .sub-banner {
+      background: #1a0a02;
+      border: 1px solid var(--orange);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #e09050;
+      margin: 12px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sub-banner a {
+      color: var(--gold);
+      text-decoration: none;
+      font-weight: 600;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    .sub-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .sub-status-badge.ativo    { background: rgba(45,122,79,.2); color: #4ac880; }
+    .sub-status-badge.vencido  { background: rgba(200,68,10,.2); color: #e07050; }
+    .sub-status-badge.cancelado{ background: rgba(100,100,100,.2); color: #888; }
+    .business-url-box {
+      background: #161616;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 11px 14px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .business-url-box .url { color: var(--gold); flex: 1; word-break: break-all; }
+    .copy-btn { background: #2a2a2a; border: none; color: var(--white); padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════
+     ESTADO: CARREGANDO
+════════════════════════════════════════════════════════ -->
+<div id="state-loading" style="display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:14px;">
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:4px;color:var(--gold);">Agendio</div>
+  <div style="font-size:13px;color:var(--mid);">Carregando painel...</div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     ESTADO: LOGIN / REGISTRO
+     Firebase Auth — email + senha
+════════════════════════════════════════════════════════ -->
+<div id="state-auth" style="display:none;align-items:center;justify-content:center;min-height:100vh;padding:24px;">
+  <div class="wizard-wrap" style="max-width:380px;width:100%;">
+
+    <!-- TAB: Login -->
+    <div id="auth-login" class="wizard-box">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:4px;color:var(--gold);margin-bottom:4px;text-align:center;">Agendio</div>
+      <h2 style="text-align:center;margin-bottom:4px;">Entrar</h2>
+      <p class="subtitle" style="text-align:center;">Acesse o painel do seu negócio</p>
+      <div class="booking-form" style="margin-top:16px;">
+        <div class="field">
+          <label>E-mail</label>
+          <input type="email" id="login-email" placeholder="seu@email.com">
+        </div>
+        <div class="field">
+          <label>Senha</label>
+          <input type="password" id="login-pw" placeholder="Sua senha"
+            onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+        <div id="login-error" style="display:none;color:#e07050;font-size:12px;margin-bottom:8px;"></div>
+        <button class="btn btn-primary" onclick="doLogin()">Entrar</button>
+        <button class="btn btn-secondary" onclick="switchAuth('register')" style="margin-top:6px;">
+          Criar minha conta →
+        </button>
+        <button class="back-btn" onclick="switchAuth('forgot')" style="margin-top:4px;width:100%;justify-content:center;font-size:12px;">
+          Esqueci minha senha
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB: Registro + Setup Wizard -->
+    <div id="auth-register" class="wizard-box" style="display:none;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:4px;color:var(--gold);margin-bottom:4px;text-align:center;">Agendio</div>
+      <h2>Criar conta</h2>
+      <p class="subtitle">Configure seu negócio em 3 passos</p>
+      <div class="wizard-steps">
+        <div class="wstep active" id="rstep-1-dot"></div>
+        <div class="wstep" id="rstep-2-dot"></div>
+        <div class="wstep" id="rstep-3-dot"></div>
+      </div>
+
+      <!-- Passo 1: Tipo de negócio -->
+      <div id="reg-step-1">
+        <p style="font-size:13px;color:var(--mid);margin-bottom:12px;">Qual é o seu negócio?</p>
+        <div class="business-types" id="reg-btype-grid"></div>
+        <button class="btn btn-primary" onclick="regNext(1)">Continuar →</button>
+        <button class="btn btn-secondary" onclick="switchAuth('login')" style="margin-top:6px;">Já tenho conta</button>
+      </div>
+
+      <!-- Passo 2: Dados do negócio -->
+      <div id="reg-step-2" style="display:none;">
+        <div class="wizard-icon" id="reg-btype-icon">💈</div>
+        <div class="booking-form">
+          <div class="field">
+            <label>Nome do negócio</label>
+            <input type="text" id="reg-shop-name" placeholder="Ex: Studio da Ana" maxlength="50">
+          </div>
+          <div class="field">
+            <label>Seu nome (profissional)</label>
+            <input type="text" id="reg-barber-name" placeholder="Ex: Ana Lima" maxlength="40">
+          </div>
+          <div class="field">
+            <label>WhatsApp (com DDD)</label>
+            <input type="tel" id="reg-wa" placeholder="11999999999" maxlength="15">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="regNext(2)">Continuar →</button>
+        <button class="back-btn" onclick="regBack(1)" style="margin-top:8px;width:100%;justify-content:center;">← Voltar</button>
+      </div>
+
+      <!-- Passo 3: Conta -->
+      <div id="reg-step-3" style="display:none;">
+        <div class="wizard-icon">📧</div>
+        <div class="booking-form">
+          <div class="field">
+            <label>E-mail de acesso</label>
+            <input type="email" id="reg-email" placeholder="seu@email.com">
+          </div>
+          <div class="field">
+            <label>Senha</label>
+            <input type="password" id="reg-pw" placeholder="Mínimo 6 caracteres" maxlength="30"
+              oninput="checkPwStrength('reg-pw','reg-pw-bar')">
+            <div class="pw-strength"><div class="pw-strength-bar" id="reg-pw-bar"></div></div>
+          </div>
+          <div class="field">
+            <label>Confirmar senha</label>
+            <input type="password" id="reg-pw2" placeholder="Repita a senha" maxlength="30">
+          </div>
+        </div>
+        <div id="reg-error" style="display:none;color:#e07050;font-size:12px;margin-bottom:8px;"></div>
+        <button class="btn btn-primary" onclick="doRegister()">Criar meu Agendio ✓</button>
+        <button class="back-btn" onclick="regBack(2)" style="margin-top:8px;width:100%;justify-content:center;">← Voltar</button>
+        <p style="font-size:11px;color:var(--mid);margin-top:10px;text-align:center;line-height:1.5;">
+          7 dias grátis. Sem cartão de crédito.
+        </p>
+      </div>
+    </div>
+
+    <!-- TAB: Recuperação de senha -->
+    <div id="auth-forgot" class="wizard-box" style="display:none;">
+      <h2>Recuperar senha</h2>
+      <p class="subtitle">Enviaremos um link para seu e-mail</p>
+      <div class="booking-form">
+        <div class="field">
+          <label>E-mail</label>
+          <input type="email" id="forgot-email" placeholder="seu@email.com">
+        </div>
+        <div id="forgot-msg" style="display:none;font-size:13px;margin-bottom:8px;"></div>
+        <button class="btn btn-primary" onclick="doForgot()">Enviar link de recuperação</button>
+        <button class="btn btn-secondary" onclick="switchAuth('login')" style="margin-top:6px;">Voltar ao login</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     ESTADO: ASSINATURA VENCIDA
+     Admin NÃO pode acessar o painel (ao contrário da pág. pública)
+════════════════════════════════════════════════════════ -->
+<div id="state-expired" style="display:none;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:24px;flex-direction:column;gap:14px;">
+  <div style="font-size:48px;">⚠️</div>
+  <h2>Assinatura vencida</h2>
+  <p style="color:var(--mid);max-width:320px;line-height:1.6;font-size:15px;">
+    Sua assinatura venceu. Renove para continuar acessando o painel e recebendo agendamentos.
+  </p>
+  <a href="https://pay.kiwify.com.br/oRpQmq7" target="_blank"
+    style="display:inline-block;background:linear-gradient(135deg,var(--orange),#df5512);color:#fff;padding:14px 28px;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:16px;text-decoration:none;">
+    🔄 Renovar assinatura — R$14,90/mês
+  </a>
+  <button class="btn btn-secondary" style="max-width:200px;" onclick="doLogout()">Sair</button>
+  <p style="font-size:11px;color:#333;">Após o pagamento, o acesso é liberado automaticamente.</p>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     PAINEL ADMIN PRINCIPAL
+     Separado da página pública — exibido só após auth + sub ativa
+════════════════════════════════════════════════════════ -->
+<div id="main-admin" style="display:none;">
+
+  <header>
+    <div class="logo">
+      <span id="admin-shop-name">Painel</span>
+      <small id="admin-biz-type">Admin</small>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">Sair</button>
+  </header>
+
+  <div id="toast"></div>
+
+  <!-- Banner de assinatura (mostra quando próxima do vencimento) -->
+  <div id="sub-warning" style="display:none;" class="sub-banner">
+    <span>⚠️ <span id="sub-warning-text"></span></span>
+    <a href="https://pay.kiwify.com.br/oRpQmq7" target="_blank">Renovar →</a>
+  </div>
+
+  <!-- Link público do negócio -->
+  <div id="business-url-section" style="padding:0 16px 0;">
+    <div class="business-url-box">
+      <span style="font-size:13px;color:var(--mid);">Seu link:</span>
+      <span class="url" id="business-public-url">—</span>
+      <button class="copy-btn" onclick="copyPublicUrl()">Copiar</button>
+    </div>
+  </div>
+
+  <!-- Navegação do admin -->
+  <div class="admin-nav">
+    <button class="admin-nav-btn active" onclick="switchTab('agenda',this)">📋 Agenda</button>
+    <button class="admin-nav-btn" onclick="switchTab('lock',this)">🔒 Bloqueio</button>
+    <button class="admin-nav-btn" onclick="switchTab('reminder',this)">📲 WA</button>
+    <button class="admin-nav-btn" onclick="switchTab('settings',this)">⚙️ Config</button>
+    <button class="admin-nav-btn" onclick="switchTab('account',this)">👤 Conta</button>
+  </div>
+
+  <!-- ── ABA AGENDA ── -->
+  <div id="tab-agenda">
+    <div class="day-tabs" id="admin-day-tabs"></div>
+    <div id="admin-appointments"></div>
+  </div>
+
+  <!-- ── ABA BLOQUEIO ── -->
+  <div id="tab-lock" style="display:none;">
+    <div id="lock-box-container"></div>
+  </div>
+
+  <!-- ── ABA WHATSAPP ── -->
+  <div id="tab-reminder" style="display:none;">
+    <div class="settings-section">
+      <h3>📲 Lembretes via WhatsApp</h3>
+      <p style="font-size:12px;color:var(--mid);margin-bottom:13px;line-height:1.5;">
+        Configure quando os clientes recebem lembretes automáticos.
+      </p>
+      <div class="reminder-item">
+        <div>
+          <strong style="font-size:13px;">Lembrete 1h antes</strong><br>
+          <span>Link de confirmação 1 hora antes</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="rem-1h" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="reminder-item">
+        <div>
+          <strong style="font-size:13px;">Lembrete no dia de manhã</strong><br>
+          <span>Às 8h do dia do agendamento</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="rem-morning">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+    <div class="settings-section">
+      <h3>Número do WhatsApp</h3>
+      <div class="field">
+        <label>Número (com DDD, só números)</label>
+        <input type="tel" id="wa-number" placeholder="11999999999" maxlength="15">
+      </div>
+      <button class="btn btn-primary" onclick="saveWaSettings()" style="margin-top:10px;font-size:15px;padding:11px;">
+        Salvar
+      </button>
+    </div>
+    <div class="info-box">
+      💡 Após o cliente agendar, um botão abre o WhatsApp com a mensagem pronta.
+      Em cada card da agenda, você pode enviar lembretes manualmente.
+    </div>
+  </div>
+
+  <!-- ── ABA CONFIGURAÇÕES ── -->
+  <div id="tab-settings" style="display:none;">
+    <div class="settings-section">
+      <h3>🏪 Seu Negócio</h3>
+      <div class="booking-form">
+        <div class="field">
+          <label>Tipo de negócio</label>
+          <select id="biz-type-select"></select>
+        </div>
+        <div class="field">
+          <label>Nome do negócio</label>
+          <input type="text" id="shop-name" placeholder="Ex: Studio da Ana" maxlength="50">
+        </div>
+        <div class="field">
+          <label>Seu nome (profissional)</label>
+          <input type="text" id="barber-name" placeholder="Ex: Ana Lima" maxlength="40">
+        </div>
+        <div class="field">
+          <label>Endereço (opcional)</label>
+          <input type="text" id="shop-address" maxlength="80">
+        </div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <h3>📅 Dias de Trabalho</h3>
+      <div class="week-days-grid" id="work-days-grid"></div>
+      <p style="font-size:11px;color:var(--mid);margin-top:5px;">Toque para ativar/desativar</p>
+    </div>
+    <div class="settings-section">
+      <h3>🕐 Horário e Intervalos</h3>
+      <div class="time-row">
+        <div class="field"><label>Início</label><input type="time" id="work-start"></div>
+        <div class="field"><label>Fim</label><input type="time" id="work-end"></div>
+      </div>
+      <div class="interval-row">
+        <div class="field">
+          <label>Duração do atendimento</label>
+          <select id="slot-interval">
+            <option value="15">15 minutos</option>
+            <option value="30">30 minutos</option>
+            <option value="45">45 minutos</option>
+            <option value="60">60 minutos</option>
+            <option value="90">90 minutos</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Pausa almoço</label>
+          <select id="lunch-break">
+            <option value="none">Sem pausa</option>
+            <option value="12:00-13:00">12h – 13h</option>
+            <option value="12:00-14:00">12h – 14h</option>
+            <option value="13:00-14:00">13h – 14h</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <h3>🚫 Folgas e Feriados</h3>
+      <div class="off-dates-list" id="off-dates-list"></div>
+      <div class="add-off-row">
+        <input type="date" id="new-off-date">
+        <button class="btn-sm" style="background:var(--orange);color:#fff;" onclick="addOffDate()">+ Adicionar</button>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="saveSettings()">Salvar Configurações</button>
+    <div style="height:16px;"></div>
+  </div>
+
+  <!-- ── ABA CONTA (substitui aba Senha) ── -->
+  <div id="tab-account" style="display:none;">
+
+    <!-- Info da assinatura -->
+    <div class="settings-section">
+      <h3>💳 Assinatura</h3>
+      <div id="sub-info-box" style="background:#161616;border-radius:8px;padding:14px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-size:13px;color:var(--mid);">Status</span>
+          <span id="sub-status-badge" class="sub-status-badge ativo">● Ativo</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-size:13px;color:var(--mid);">Plano</span>
+          <span id="sub-plano" style="font-size:13px;">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="font-size:13px;color:var(--mid);">Vence em</span>
+          <span id="sub-vencimento" style="font-size:13px;">—</span>
+        </div>
+      </div>
+      <a href="https://pay.kiwify.com.br/oRpQmq7" target="_blank" class="btn btn-primary"
+        style="text-decoration:none;display:block;text-align:center;">
+        🔄 Renovar / Assinar — R$14,90/mês
+      </a>
+    </div>
+
+    <!-- Alterar senha -->
+    <div class="pw-section">
+      <h3>🔑 Alterar Senha</h3>
+      <p>Escolha uma senha segura. Mínimo 6 caracteres.</p>
+      <div class="booking-form">
+        <div class="field">
+          <label>Nova senha</label>
+          <input type="password" id="pw-new" placeholder="Nova senha (mín. 6)" maxlength="30"
+            oninput="checkPwStrength('pw-new','pw-bar')">
+          <div class="pw-strength"><div class="pw-strength-bar" id="pw-bar"></div></div>
+        </div>
+        <div class="field">
+          <label>Confirmar nova senha</label>
+          <input type="password" id="pw-confirm" placeholder="Repita" maxlength="30">
+        </div>
+        <button class="btn btn-primary" onclick="changePassword()">Alterar Senha</button>
+      </div>
+    </div>
+
+    <!-- Zona de perigo -->
+    <div class="settings-section" style="border-color:rgba(200,68,10,.2);">
+      <h3>⚠️ Conta</h3>
+      <p style="font-size:12px;color:var(--mid);margin-bottom:12px;">
+        E-mail: <span id="account-email">—</span>
+      </p>
+      <button class="btn btn-danger" onclick="doLogout()">Sair da conta</button>
+    </div>
+
+  </div>
+
+</div><!-- /main-admin -->
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  AGENDIO SaaS — admin/app.js (inline)
+//  Painel administrativo com Firebase Auth e Firestore.
+//  Reutiliza toda a lógica de negócio de business-logic.js.
+// ═══════════════════════════════════════════════════════════════
+
+// ── ESTADO GLOBAL ────────────────────────────────────────────────
+let businessId      = null;
+let businessDoc     = null;
+let settings        = null;
+let dayCache        = {};
+let adminDaySelected = null;
+let currentTab      = 'agenda';
+let toastTimer      = null;
+let regBizType      = BUSINESS_TYPES[0]; // Tipo selecionado no registro
+
+// ── CONTROLE DE ESTADO VISUAL ────────────────────────────────────
+function setState(state) {
+  ['loading','auth','expired','main-admin'].forEach(s => {
+    const el = document.getElementById(`state-${s}`) || document.getElementById(s === 'main-admin' ? 'main-admin' : `state-${s}`);
+    if (el) el.style.display = 'none';
+  });
+  document.getElementById('main-admin').style.display = 'none';
+
+  if (state === 'loading') {
+    document.getElementById('state-loading').style.display = 'flex';
+  } else if (state === 'auth') {
+    document.getElementById('state-auth').style.display = 'flex';
+  } else if (state === 'expired') {
+    document.getElementById('state-expired').style.display = 'flex';
+  } else if (state === 'admin') {
+    document.getElementById('main-admin').style.display = 'block';
+  }
+}
+
+// ── INICIALIZAÇÃO ────────────────────────────────────────────────
+/**
+ * Observa o estado de autenticação do Firebase.
+ * Quando o usuário está logado, busca o negócio dele e verifica a assinatura.
+ */
+auth.onAuthStateChanged(async (user) => {
+  if (!user) {
+    // Usuário não logado → mostra tela de login
+    setState('auth');
+    initRegisterForm();
+    return;
+  }
+
+  try {
+    setState('loading');
+
+    // Busca o negócio associado ao UID do usuário
+    businessDoc = await BusinessAPI.getByOwner(user.uid);
+
+    if (!businessDoc) {
+      // Usuário sem negócio → provavelmente acabou de criar conta mas o doc não foi criado
+      // Isso não deveria acontecer normalmente — loga o erro
+      await Logger.error(user.uid, 'Usuário autenticado sem negócio associado');
+      setState('auth');
+      return;
+    }
+
+    businessId = businessDoc.id;
+    settings   = { ...DEFAULT_SETTINGS, ...businessDoc.config };
+
+    // Verifica assinatura — admin NÃO pode entrar com assinatura vencida
+    if (!Subscription.isActive(businessDoc)) {
+      setState('expired');
+      await Logger.warn(businessId, 'Tentativa de acesso ao admin com assinatura vencida');
+      return;
+    }
+
+    // Tudo ok — inicializa o admin
+    setState('admin');
+    await initAdmin(user);
+
+  } catch (error) {
+    await Logger.error(null, 'Erro fatal no auth observer', { uid: user?.uid, error: error.message });
+    setState('auth');
+  }
+});
+
+/** Inicializa o painel admin após autenticação confirmada */
+async function initAdmin(user) {
+  // Header
+  document.getElementById('admin-shop-name').textContent = settings.shopName;
+  document.getElementById('admin-biz-type').textContent  = getBizType(settings.bizType).label;
+  document.getElementById('account-email').textContent   = user.email;
+
+  // Link público
+  const publicUrl = `${window.location.origin}/${businessDoc.slug}`;
+  document.getElementById('business-public-url').textContent = publicUrl;
+
+  // Banner de assinatura (avisa quando faltam ≤7 dias)
+  const daysLeft = Subscription.daysLeft(businessDoc);
+  if (daysLeft <= 7 && daysLeft > 0) {
+    document.getElementById('sub-warning').style.display = 'flex';
+    document.getElementById('sub-warning-text').textContent =
+      `Sua assinatura vence em ${daysLeft} dia${daysLeft !== 1 ? 's' : ''}. Renove para não perder o acesso.`;
+  }
+
+  // Tab inicial
+  await switchTab('agenda');
+
+  // Timers — iguais ao original
+  setInterval(checkNoShows, 15000);
+  setInterval(updateCountdowns, 1000);
+  checkNoShows();
+}
+
+// ── AUTH: LOGIN ──────────────────────────────────────────────────
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pw    = document.getElementById('login-pw').value;
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+
+  if (!email || !pw) { showLoginError('Preencha e-mail e senha'); return; }
+
+  try {
+    await auth.signInWithEmailAndPassword(email, pw);
+    // onAuthStateChanged cuida do resto
+  } catch (e) {
+    const msgs = {
+      'auth/user-not-found':  'E-mail não cadastrado',
+      'auth/wrong-password':  'Senha incorreta',
+      'auth/invalid-email':   'E-mail inválido',
+      'auth/too-many-requests':'Muitas tentativas. Aguarde alguns minutos.',
+    };
+    showLoginError(msgs[e.code] || 'Erro ao entrar. Tente novamente.');
+  }
+}
+
+function showLoginError(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent    = msg;
+  el.style.display  = 'block';
+}
+
+// ── AUTH: REGISTRO ───────────────────────────────────────────────
+function initRegisterForm() {
+  const grid = document.getElementById('reg-btype-grid');
+  if (!grid || grid.children.length) return; // já inicializado
+  BUSINESS_TYPES.forEach(bt => {
+    const el = document.createElement('div');
+    el.className = 'btype' + (bt.id === regBizType.id ? ' selected' : '');
+    el.innerHTML = `<span class="btype-icon">${bt.icon}</span>${bt.label}`;
+    el.onclick = () => {
+      document.querySelectorAll('.btype').forEach(b => b.classList.remove('selected'));
+      el.classList.add('selected');
+      regBizType = bt;
+    };
+    grid.appendChild(el);
+  });
+}
+
+function switchAuth(tab) {
+  ['login','register','forgot'].forEach(t => {
+    document.getElementById(`auth-${t}`).style.display = t === tab ? 'block' : 'none';
+  });
+  if (tab === 'register') initRegisterForm();
+}
+
+function regNext(step) {
+  if (step === 1) {
+    document.getElementById('reg-step-1').style.display = 'none';
+    document.getElementById('reg-step-2').style.display = 'block';
+    document.getElementById('reg-btype-icon').textContent = regBizType.icon;
+    document.getElementById('rstep-1-dot').className = 'wstep done';
+    document.getElementById('rstep-2-dot').className = 'wstep active';
+  } else if (step === 2) {
+    const name = document.getElementById('reg-shop-name').value.trim();
+    if (!name) { showToast('Digite o nome do negócio', true); return; }
+    document.getElementById('reg-step-2').style.display = 'none';
+    document.getElementById('reg-step-3').style.display = 'block';
+    document.getElementById('rstep-2-dot').className = 'wstep done';
+    document.getElementById('rstep-3-dot').className = 'wstep active';
+  }
+}
+
+function regBack(step) {
+  if (step === 1) {
+    document.getElementById('reg-step-2').style.display = 'none';
+    document.getElementById('reg-step-1').style.display = 'block';
+    document.getElementById('rstep-2-dot').className = 'wstep';
+    document.getElementById('rstep-1-dot').className = 'wstep active';
+  } else if (step === 2) {
+    document.getElementById('reg-step-3').style.display = 'none';
+    document.getElementById('reg-step-2').style.display = 'block';
+    document.getElementById('rstep-3-dot').className = 'wstep';
+    document.getElementById('rstep-2-dot').className = 'wstep active';
+  }
+}
+
+async function doRegister() {
+  const email  = document.getElementById('reg-email').value.trim();
+  const pw     = document.getElementById('reg-pw').value;
+  const pw2    = document.getElementById('reg-pw2').value;
+  const errEl  = document.getElementById('reg-error');
+  errEl.style.display = 'none';
+
+  if (!email)        { errEl.textContent = 'Digite seu e-mail'; errEl.style.display = 'block'; return; }
+  if (pw.length < 6) { errEl.textContent = 'Senha mínimo 6 caracteres'; errEl.style.display = 'block'; return; }
+  if (pw !== pw2)    { errEl.textContent = 'As senhas não conferem'; errEl.style.display = 'block'; return; }
+
+  try {
+    // Cria o usuário no Firebase Auth
+    const cred = await auth.createUserWithEmailAndPassword(email, pw);
+    const uid  = cred.user.uid;
+
+    // Monta as settings iniciais
+    const initSettings = {
+      ...DEFAULT_SETTINGS,
+      shopName:   document.getElementById('reg-shop-name').value.trim() || 'Meu Negócio',
+      barberName: document.getElementById('reg-barber-name').value.trim() || 'Profissional',
+      waNumber:   document.getElementById('reg-wa').value.replace(/\D/g, ''),
+      bizType:    regBizType.id,
+    };
+
+    // Cria o documento do negócio no Firestore
+    await BusinessAPI.create(uid, email, initSettings);
+
+    // onAuthStateChanged vai detectar o login e redirecionar
+  } catch (e) {
+    const msgs = {
+      'auth/email-already-in-use': 'Este e-mail já está cadastrado',
+      'auth/invalid-email':        'E-mail inválido',
+      'auth/weak-password':        'Senha muito fraca',
+    };
+    errEl.textContent  = msgs[e.code] || 'Erro ao criar conta: ' + e.message;
+    errEl.style.display = 'block';
+    await Logger.error(null, 'Erro no registro', { email, error: e.message });
+  }
+}
+
+// ── AUTH: RECUPERAR SENHA ─────────────────────────────────────────
+async function doForgot() {
+  const email  = document.getElementById('forgot-email').value.trim();
+  const msgEl  = document.getElementById('forgot-msg');
+  if (!email) return;
+
+  try {
+    await auth.sendPasswordResetEmail(email);
+    msgEl.style.color   = '#4ac880';
+    msgEl.textContent   = '✅ Link enviado! Verifique sua caixa de entrada.';
+    msgEl.style.display = 'block';
+  } catch (e) {
+    msgEl.style.color   = '#e07050';
+    msgEl.textContent   = 'E-mail não encontrado.';
+    msgEl.style.display = 'block';
+  }
+}
+
+// ── AUTH: LOGOUT ─────────────────────────────────────────────────
+async function doLogout() {
+  await auth.signOut();
+  setState('auth');
+}
+
+// ── TABS ─────────────────────────────────────────────────────────
+async function switchTab(tab, btnEl) {
+  currentTab = tab;
+  document.querySelectorAll('.admin-nav-btn').forEach(b => b.classList.remove('active'));
+  if (btnEl) {
+    btnEl.classList.add('active');
+  } else {
+    const idx  = ['agenda','lock','reminder','settings','account'].indexOf(tab);
+    const btns = document.querySelectorAll('.admin-nav-btn');
+    if (btns[idx]) btns[idx].classList.add('active');
+  }
+
+  ['agenda','lock','reminder','settings','account'].forEach(t => {
+    document.getElementById(`tab-${t}`).style.display = t === tab ? 'block' : 'none';
+  });
+
+  if (tab === 'agenda')   await renderAgendaTab();
+  if (tab === 'lock')     renderLockTab();
+  if (tab === 'reminder') renderReminderTab();
+  if (tab === 'settings') renderSettingsTab();
+  if (tab === 'account')  renderAccountTab();
+}
+
+// ── ABA AGENDA ────────────────────────────────────────────────────
+async function renderAgendaTab() {
+  const days = getWeekDays(settings);
+  const tabs = document.getElementById('admin-day-tabs');
+  tabs.innerHTML = '';
+
+  if (!adminDaySelected && days.length) adminDaySelected = days[0].key;
+
+  // Carrega agendamentos de todos os dias
+  await Promise.all(days.map(async day => {
+    dayCache[day.key] = await AppointmentsAPI.getDayAppointments(businessId, day.key);
+  }));
+
+  days.forEach(day => {
+    const t      = document.createElement('div');
+    const isOff  = settings.offDates?.includes(day.key);
+    t.className  = 'day-tab' + (day.key === adminDaySelected ? ' active' : '') + (isOff ? ' is-off' : '');
+    t.textContent = day.name.slice(0,3) + ' ' + day.date.getDate();
+    t.onclick = async () => { adminDaySelected = day.key; await renderAgendaTab(); };
+    tabs.appendChild(t);
+  });
+
+  renderAdminAppointments();
+}
+
+function renderAdminAppointments() {
+  const shopSlots = generateSlots(settings);
+  const dayData   = dayCache[adminDaySelected] || {};
+  const container = document.getElementById('admin-appointments');
+  container.innerHTML = '';
+
+  if (settings.offDates?.includes(adminDaySelected)) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">🚫</div>Dia de folga</div>`;
+    return;
+  }
+
+  const booked = shopSlots.filter(t => dayData[t] && !dayData[t].freed);
+  if (!booked.length) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">📋</div>Nenhum agendamento neste dia</div>`;
+    return;
+  }
+
+  const biz = getBizType(settings.bizType);
+  booked.forEach(time => {
+    const appt = dayData[time];
+    const card = document.createElement('div');
+    card.className = 'appointment-card' +
+      (appt.arrived   ? ' arrived'        : '') +
+      (appt.cancelled ? ' cancelled-card' : '');
+
+    let actionHtml = '';
+    if (appt.cancelled) {
+      actionHtml = `<span class="cancelled-badge">✗ Cancelado</span>`;
+    } else if (appt.arrived) {
+      actionHtml = `<span class="arrived-badge">✓ Chegou</span>`;
+    } else {
+      const cdInfo = getCountdownInfo(appt);
+      const cdHtml = cdInfo.active
+        ? `<span class="countdown-badge" id="cd-${adminDaySelected}-${time.replace(':','')}">⏱ ${cdInfo.label}</span>`
+        : '';
+      actionHtml = `${cdHtml}<button class="arrived-btn" onclick="markArrived('${adminDaySelected}','${time}')">✓ Chegou</button>`;
+    }
+
+    const reminderMsg = encodeURIComponent(
+      `Olá ${appt.name}! Lembrete: seu ${biz.service} em ${settings.shopName} é hoje às ${time}. Te esperamos! ${biz.icon}`
+    );
+    const waLink = appt.phone
+      ? `<a href="https://wa.me/55${appt.phone.replace(/\D/g,'')}?text=${reminderMsg}" target="_blank" style="font-size:11px;color:var(--wa);text-decoration:none;">📲 Lembrete WA</a>`
+      : '';
+
+    card.innerHTML = `
+      <div class="time-badge">${time}</div>
+      <div class="client-name">${appt.name}</div>
+      <div class="client-phone">📱 ${appt.phone}</div>
+      <div class="card-bottom">
+        <div style="display:flex;flex-direction:column;gap:2px;">
+          ${waLink}
+          <span style="font-size:10px;color:var(--mid);">Ag. ${formatRelativeTime(appt.bookedAt)}</span>
+        </div>
+        <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;">${actionHtml}</div>
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+async function markArrived(dateKey, time) {
+  const dayData = { ...dayCache[dateKey] };
+  if (!dayData[time]) return;
+  dayData[time] = { ...dayData[time], arrived: true, countdownStart: null };
+
+  await AppointmentsAPI.updateSlot(businessId, dateKey, time, dayData[time]);
+  dayCache[dateKey] = dayData;
+  renderAdminAppointments();
+  showToast('✓ Marcado como chegou!');
+}
+
+// ── ABA BLOQUEIO ──────────────────────────────────────────────────
+function renderLockTab() {
+  const box = document.getElementById('lock-box-container');
+  if (settings.locked) {
+    const since = settings.lockedSince
+      ? new Date(settings.lockedSince).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' })
+      : '—';
+    box.innerHTML = `
+      <div class="lock-box">
+        <h3>🔒 Agenda Bloqueada</h3>
+        <div class="lock-status"><div class="lock-dot red"></div>Bloqueada desde ${since}</div>
+        <p>Nenhum novo agendamento pode ser feito.</p>
+        <button class="btn btn-green" onclick="toggleLock(false)">✅ Reabrir Agenda</button>
+      </div>
+      <div class="info-box">💡 O bloqueio não cancela agendamentos existentes — apenas impede novos.</div>`;
+  } else {
+    box.innerHTML = `
+      <div class="lock-box unlocked">
+        <h3>Controle de Disponibilidade</h3>
+        <div class="lock-status"><div class="lock-dot"></div>Agenda aberta normalmente</div>
+        <p>Use o bloqueio de emergência para pausar novos agendamentos.</p>
+        <button class="btn btn-danger" onclick="toggleLock(true)">🔒 Fechar Agenda Agora</button>
+      </div>
+      <div class="info-box">💡 Útil para emergências ou imprevistos.</div>`;
+  }
+}
+
+async function toggleLock(lock) {
+  settings.locked      = lock;
+  settings.lockedSince = lock ? Date.now() : null;
+  await BusinessAPI.updateConfig(businessId, settings);
+  renderLockTab();
+  showToast(lock ? '🔒 Agenda fechada' : '✅ Agenda reaberta!');
+}
+
+// ── ABA WHATSAPP ──────────────────────────────────────────────────
+function renderReminderTab() {
+  document.getElementById('rem-1h').checked      = settings.rem1h !== false;
+  document.getElementById('rem-morning').checked = !!settings.remMorning;
+  document.getElementById('wa-number').value     = settings.waNumber || '';
+}
+
+async function saveWaSettings() {
+  settings.rem1h      = document.getElementById('rem-1h').checked;
+  settings.remMorning = document.getElementById('rem-morning').checked;
+  settings.waNumber   = document.getElementById('wa-number').value.replace(/\D/g, '');
+  await BusinessAPI.updateConfig(businessId, settings);
+  showToast('✅ Configurações salvas!');
+}
+
+// ── ABA CONFIGURAÇÕES ─────────────────────────────────────────────
+function renderSettingsTab() {
+  const sel = document.getElementById('biz-type-select');
+  sel.innerHTML = '';
+  BUSINESS_TYPES.forEach(bt => {
+    const o = document.createElement('option');
+    o.value = bt.id; o.textContent = bt.icon + ' ' + bt.label;
+    if (bt.id === settings.bizType) o.selected = true;
+    sel.appendChild(o);
+  });
+
+  document.getElementById('shop-name').value    = settings.shopName;
+  document.getElementById('barber-name').value  = settings.barberName;
+  document.getElementById('shop-address').value = settings.shopAddress || '';
+
+  const DAY_NAMES = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const wdg = document.getElementById('work-days-grid');
+  wdg.innerHTML = '';
+  [1,2,3,4,5,6,0].forEach(dow => {
+    const d = document.createElement('div');
+    d.className   = 'day-toggle' + (settings.workDays?.includes(dow) ? ' on' : '');
+    d.textContent = DAY_NAMES[dow];
+    d.dataset.dow = dow;
+    d.onclick = () => d.classList.toggle('on');
+    wdg.appendChild(d);
+  });
+
+  document.getElementById('work-start').value    = settings.startTime;
+  document.getElementById('work-end').value      = settings.endTime;
+  document.getElementById('slot-interval').value = settings.intervalMin;
+  document.getElementById('lunch-break').value   = settings.lunchBreak;
+  renderOffDates(settings.offDates || []);
+}
+
+function renderOffDates(offDates) {
+  const list = document.getElementById('off-dates-list');
+  list.innerHTML = '';
+  if (!offDates.length) {
+    list.innerHTML = `<p style="font-size:12px;color:var(--mid);margin-bottom:7px;">Nenhuma folga cadastrada</p>`;
+    return;
+  }
+  [...offDates].sort().forEach(d => {
+    const [y,m,day] = d.split('-');
+    const item = document.createElement('div');
+    item.className = 'off-date-item';
+    item.innerHTML = `<span>🚫 ${day}/${m}/${y}</span><button class="remove-btn" onclick="removeOffDate('${d}')">×</button>`;
+    list.appendChild(item);
+  });
+}
+
+async function addOffDate() {
+  const val = document.getElementById('new-off-date').value;
+  if (!val) { showToast('Selecione uma data', true); return; }
+  if (!settings.offDates) settings.offDates = [];
+  if (settings.offDates.includes(val)) { showToast('Data já cadastrada', true); return; }
+  settings.offDates.push(val);
+  await BusinessAPI.updateConfig(businessId, settings);
+  renderOffDates(settings.offDates);
+  document.getElementById('new-off-date').value = '';
+  showToast('Folga adicionada!');
+}
+
+async function removeOffDate(d) {
+  settings.offDates = (settings.offDates || []).filter(x => x !== d);
+  await BusinessAPI.updateConfig(businessId, settings);
+  renderOffDates(settings.offDates);
+  showToast('Removido');
+}
+
+async function saveSettings() {
+  settings.bizType    = document.getElementById('biz-type-select').value;
+  settings.shopName   = document.getElementById('shop-name').value.trim() || 'Meu Negócio';
+  settings.barberName = document.getElementById('barber-name').value.trim() || 'Profissional';
+  settings.shopAddress = document.getElementById('shop-address').value.trim();
+
+  const toggles = document.querySelectorAll('.day-toggle');
+  settings.workDays = [];
+  toggles.forEach(t => { if (t.classList.contains('on')) settings.workDays.push(parseInt(t.dataset.dow)); });
+
+  settings.startTime   = document.getElementById('work-start').value;
+  settings.endTime     = document.getElementById('work-end').value;
+  settings.intervalMin = parseInt(document.getElementById('slot-interval').value);
+  settings.lunchBreak  = document.getElementById('lunch-break').value;
+
+  if (settings.startTime >= settings.endTime) { showToast('Início deve ser antes do fim', true); return; }
+  if (!settings.workDays.length)              { showToast('Selecione ao menos um dia', true); return; }
+
+  await BusinessAPI.updateConfig(businessId, settings);
+  document.getElementById('admin-shop-name').textContent = settings.shopName;
+  showToast('✅ Configurações salvas!');
+}
+
+// ── ABA CONTA ─────────────────────────────────────────────────────
+function renderAccountTab() {
+  const status = Subscription.getStatus(businessDoc);
+  const badge  = document.getElementById('sub-status-badge');
+  badge.className   = `sub-status-badge ${status}`;
+  badge.textContent = status === 'ativo' ? '● Ativo' : status === 'vencido' ? '● Vencido' : '● Cancelado';
+
+  document.getElementById('sub-plano').textContent = businessDoc.plano || '—';
+
+  const venc = businessDoc.data_vencimento?.toDate ? businessDoc.data_vencimento.toDate() : null;
+  document.getElementById('sub-vencimento').textContent = venc
+    ? venc.toLocaleDateString('pt-BR') + ` (${Subscription.daysLeft(businessDoc)} dias)`
+    : '—';
+}
+
+async function changePassword() {
+  const nw   = document.getElementById('pw-new').value;
+  const conf = document.getElementById('pw-confirm').value;
+  if (nw.length < 6) { showToast('Senha mínimo 6 caracteres', true); return; }
+  if (nw !== conf)   { showToast('As senhas não conferem', true);     return; }
+  try {
+    await auth.currentUser.updatePassword(nw);
+    document.getElementById('pw-new').value    = '';
+    document.getElementById('pw-confirm').value = '';
+    showToast('✅ Senha alterada!');
+  } catch (e) {
+    // Firebase exige reautenticação se o login foi há muito tempo
+    if (e.code === 'auth/requires-recent-login') {
+      showToast('Faça logout e entre novamente para alterar a senha', true);
+    } else {
+      showToast('Erro ao alterar senha', true);
+    }
+  }
+}
+
+// ── NO-SHOW TIMER ─────────────────────────────────────────────────
+async function checkNoShows() {
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const dayData  = { ...dayCache[todayKey] };
+  if (!dayData) return;
+  const now = Date.now();
+  let changed = false;
+
+  for (const [time, appt] of Object.entries(dayData)) {
+    if (!appt || appt.arrived || appt.freed || appt.cancelled) continue;
+    const slotMs = slotDateTime(todayKey, time).getTime();
+    if (now >= slotMs && !appt.countdownStart) {
+      dayData[time] = { ...appt, countdownStart: slotMs };
+      await AppointmentsAPI.updateSlot(businessId, todayKey, time, dayData[time]);
+      changed = true;
+    }
+    if (appt.countdownStart && (now - appt.countdownStart) >= NO_SHOW_TIMEOUT) {
+      dayData[time] = { ...appt, freed: true, freedAt: now };
+      await AppointmentsAPI.updateSlot(businessId, todayKey, time, dayData[time]);
+      changed = true;
+      showToast(`⚡ ${time} liberado — cliente não chegou`);
+    }
+  }
+
+  if (changed) {
+    dayCache[todayKey] = dayData;
+    if (currentTab === 'agenda') renderAdminAppointments();
+  }
+}
+
+function updateCountdowns() {
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const dayData  = dayCache[todayKey] || {};
+  Object.keys(dayData).forEach(time => {
+    const appt = dayData[time];
+    if (!appt || appt.arrived || appt.freed || appt.cancelled || !appt.countdownStart) return;
+    const el = document.getElementById(`cd-${todayKey}-${time.replace(':','')}`);
+    if (!el) return;
+    const info = getCountdownInfo(appt);
+    if (info.active) el.textContent = `⏱ ${info.label}`;
+  });
+}
+
+// ── UTILIDADES ────────────────────────────────────────────────────
+function copyPublicUrl() {
+  const url = document.getElementById('business-public-url').textContent;
+  navigator.clipboard.writeText(url).then(() => showToast('Link copiado!'));
+}
+
+function showToast(msg, warn = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = warn ? 'warn' : '';
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3400);
+}
+</script>
+</body>
+</html>
